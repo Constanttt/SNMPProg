@@ -67,7 +67,7 @@ L'application est testée sur un environnement physique présent
 
 Cas d'utilisation du module de configuration :
 
-![Usecase](/home/constant/Documents/Dev/SMTP_Projet/SNMPProg/Usecase.png)
+![Usecase](doc/Usecase.png)
 
 **Organisation du module :**
 	Classe Conf_Reader qui va s'occuper de la lecture du ficheir de configuration.
