@@ -37,11 +37,11 @@ class Conf_Reader:
 
         self.tree.write('config.xml')
 
-    def delete_device(self, device_type, device_ip):
-        for t in self.config.findall(device_type):
-            for device in t.findall('device'):
+    def delete_device(self, device_ip):
+        for config_type in self.config:
+            for device in config_type:
                 if device.attrib['ip'] == device_ip:
-                    t.remove(device)
+                    config_type.remove(device)
         self.tree.write('config.xml')
 
     def edit_device(self, device_type, new_device_ip, old_device_ip, new_device_community, old_device_community):
