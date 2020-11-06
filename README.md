@@ -26,17 +26,17 @@ Pour une application de surveillance, il est très important de consigner chaque
 
 Chaque module peut être développé indépendamment. Ils feront chacun l'objet d'une étude permettant de définir les fonctionnalités essentielles (Use Cases). Un schéma de classes décrivant les principales entités du module et leurs relations avec les classes internes ou extérieures au module constitueront le point de départ de chacune des implémentations.
 
-# Implémentation
+## Implémentation
 
-## Choix techniques
+### Choix techniques
 
-### Langage
+#### Langage
 
 Le langage principal utilisé pour développer cette application est le Python. C'est un langage maîtrisé par les membres du binôme. C'est aussi un langage pertinent pour faire une application de ce genre : il est possible de créer une interface, de lire des fichiers et de communiquer avec une base de donnée.
 
 Le module de surveillance sera développé en bash, car la commande `snmp-table` permet une gestion des données plus simple. Nous n'avons pas trouvé d'alternative satisfaisante a cette commande en Python.
 
-### Architecture
+#### Architecture
 
 L'application sera découpée en plusieurs modules différents :
 
@@ -49,7 +49,7 @@ L'application sera découpée en plusieurs modules différents :
 
 Les modules seront développés pour pouvoir fonctionner de manière indépendante. Ils communiqueront via API REST. Ce choix de fonctionnement a été choisi afin de permettre à l'administrateur de l'application de mettre les modules sur différents serveurs, si il le souhaite. Ce fonctionnement permet aussi de limiter la charge de travail sur un seul module en répartissant les taches entre différents modules. 
 
-## Organisation du travail
+### Organisation du travail
 
 Nous avons décider d'utiliser Trello pour la gestion de projet. Cet outil correspond bien a notre projet, chaque module correspondant a une tache, chaque taches ayant des "objectifs" a remplir pour être complétée.
 
@@ -61,9 +61,9 @@ Pour la communication interne au binôme, les applications Teams et Discord sont
 
 L'application est testée sur un environnement physique présent
 
-## Avancement
+### Avancement
 
-### Module de configuration
+#### Module de configuration
 
 Cas d'utilisation du module de configuration :
 
@@ -88,23 +88,23 @@ La difficulté principale rencontrée lors du développement de ce module fut le
 
 Ce module est terminé, il propose toutes les fonctionnalités prévues initialement.
 
-### Module de surveillance
+#### Module de surveillance
 
 Le module de configuration est développé en Bash.
 
-### Module de traitement des données
+#### Module de traitement des données
 
 *en cours*
 
-### Module de log
+#### Module de log
 
 *en cours*
 
-### Module de connexion a la base de donnée
+#### Module de connexion a la base de donnée
 
 *en cours*
 
-### Module de "interface web"
+#### Module de "interface web"
 
 *en cours*
 
