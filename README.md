@@ -11,8 +11,8 @@ Les objectifs sont les suivants :
 
 ### Module de configuration
 
-L'application doit être configurable, c'est à dire qu'il doit être possible d'ajouter du nouveau matériel a configurer, ou supprimer un équipement. Les informations importante sont le matériel en lui même et type d'information a monitorer.
-Il faut donc développer un module qui permet de gérer cette configuration de la façon al plus simple possible. 
+L'application doit être configurable, c'est à dire qu'il doit être possible d'ajouter du nouveau matériel a configurer, ou supprimer un équipement. Les informations importantes sont le matériel en lui même et le type d'information a monitorer.
+Il faut donc développer un module qui permet de gérer cette configuration de la façon la plus simple possible. 
 
 ### Module de surveillance
 
@@ -34,7 +34,7 @@ Chaque module peut être développé indépendamment. Ils feront chacun l'objet 
 
 Le langage principal utilisé pour développer cette application est le Python. C'est un langage maîtrisé par les membres du binôme. C'est aussi un langage pertinent pour faire une application de ce genre : il est possible de créer une interface, de lire des fichiers et de communiquer avec une base de donnée.
 
-Le module de surveillance sera développé en bash, car la commande `snmp-table` permet une gestion des données plus simple. Nous n'avons pas trouvé d'alternative satisfaisante a cette commande en Python.
+Le module de surveillance sera développé en bash, car la commande `snmptable` permet une gestion des données plus simple. Lorsque l'on veut récupérer la liste des interfaces par exemple, cette commande permet d'obtenir toutes les informations sous forme de csv ce qui rend le transfert d'informations plus simple. Nous n'avons pas trouvé d'alternative satisfaisante a cette commande en Python.
 
 #### Architecture
 
@@ -70,7 +70,7 @@ Cas d'utilisation du module de configuration :
 ![Usecase](doc/Usecase.png)
 
 **Organisation du module :**
-	Classe Conf_Reader qui va s'occuper de la lecture du ficheir de configuration.
+	Classe Conf_Reader qui va s'occuper de la lecture du fichier de configuration.
 	Cette classe sera utilisé dans la fonction principale.
 	Les différentes méthodes de Conf_Reader seront réparties sur différents endpoint en utilisant des méthodes différentes (POST, GET, PUT etc...)
 
@@ -90,7 +90,7 @@ Ce module est terminé, il propose toutes les fonctionnalités prévues initiale
 
 #### Module de surveillance
 
-Le module de configuration est développé en Bash.
+Le module de configuration est développé en Bash. Il comprend un script qui récupère via un ´curl´ les équipements à monitorer, les communautés et toutes informations pouvant être utile. Ensuite via des ´snmptable´ nous récupérons les données en les écrivant dans des fichiers csv le temps de faire notre traitement. Puis nous envoyons les données via des ´PUT´ au serveur de traitement de donnée.
 
 #### Module de traitement des données
 
