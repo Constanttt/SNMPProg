@@ -92,6 +92,8 @@ Ce module est terminé, il propose toutes les fonctionnalités prévues initiale
 
 Le module de configuration est développé en Bash. Il comprend un script qui récupère via un ´curl´ les équipements à monitorer, les communautés et toutes informations pouvant être utile. Ensuite via des ´snmptable´ nous récupérons les données en les écrivant dans des fichiers csv le temps de faire notre traitement. Puis nous envoyons les données via des ´PUT´ au serveur de traitement de donnée.
 
+Ce module demande l'installation de snmp et des mibs
+
 #### Module de traitement des données
 
 *en cours*
