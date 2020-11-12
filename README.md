@@ -102,19 +102,31 @@ A ce jour le collecteur est fini. Il manque la création du module de traitement
 
 #### Module de traitement des données
 
-*en cours*
+Le développement de ce module débutera à la fin du développement du module de surveillance.\
+Son but principal étant de traiter les données du collecteur pour ensuite les stocker en base de donnée.
 
 #### Module de log
 
-*en cours*
+Il a été décidé de stocker les différents logs dans une base de donnée.
 
 #### Module de connexion a la base de donnée
 
-*en cours*
+Ce module sera l'intermédiaire entre les modules ayant besoin d'accéder à la base de donnée et la base de donnée en elle même.\
+Cela permet de ne pas avoir les informations de connection à la base de donnée dans différents modules. Ces informations sont stockées directement dans le module de connection a la base de donnée.\
+Pour le moment, ce module ne doit que servir d'intermédiaire, mais il faut développer ce module en ayant en tête la possibilité d'un système d'authentification. Ce système ne sera peut être pas développé en raison de contraintes de temps.
 
 #### Module de "interface web"
 
-*en cours*
+Cette interface sera très simple :
+
+- un tableau récapitulatif des résultats du collecteur (avec possibilité de trier par nom/ip)
+- une page spéciale montrant les logs.
+- une page permettant de visionner des statistiques sur un appareil (si suffisemment de temps)
 
 ## Conclusion
 
+Pour le moment, le module de configuration est finalisé, une infrastructure de test pour l'application est mise en place et le module de surveillance est en cours de développement.\
+Le projet avance comme prévu, un petit peu de retard a été pris pour mettre en place une infrastructure de test fonctionnelle.\
+Il est prévu de mettre en place la base de donnée ainsi que le module de connection a la base de donnée dans les prochaines semaines. En parallèle, le module de surveillance sera en développement, si il est finalisé, le développement du module de traitement débutera.\
+Le système de log sera développé a la fin, car il faut une base de donnée fonctionnelle pour son fonctionnement.\
+Pour ce qui est de l'interface web, ce sera la partie finale du projet.
