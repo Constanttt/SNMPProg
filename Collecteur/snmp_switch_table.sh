@@ -68,7 +68,7 @@ function ifTable
     if [ -z $timeout ];then
         #snmptable to get the show interface
         snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${name}_ifTable_temp.csv; returncode=$?
-        echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable"
+        #echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable"
     else
         #snmptable to get the show interface
         snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${name}_ifTable_temp.csv; returncode=$?
@@ -95,7 +95,7 @@ function ipAddrTable
     if [ -z $timeout ];then
         #snmptable to get IP address table
         snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable > ${TmpDir}${name}_ipAddrTable_temp.csv; returncode=$?
-    	echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable"
+    	#echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable"
     else
         #snmptable to get IP address table
         snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable > ${TmpDir}${name}_ipAddrTable_temp.csv; returncode=$?
@@ -124,7 +124,7 @@ function vmVlan
     if [ -z $timeout ];then
         #snmptable to get Vlan Table
         snmpwalk -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os >> ${TmpDir}${name}_vmVlan_temp.csv; returncode=$?
-    	echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os"
+    	#echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os"
     else
         #snmptable to get Vlan Table
         snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os >> ${TmpDir}${name}_vmVlan_temp.csv; returncode=$?
@@ -151,7 +151,7 @@ function vtpVlanTable
     if [ -z $timeout ];then
         #snmptable to get VTP
         snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable > ${TmpDir}${name}_vtpVlanTable_temp.csv; returncode=$?
-    	echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable"
+    	#echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable"
     else
         #snmptable to get VTP
         snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable > ${TmpDir}${name}_vtpVlanTable_temp.csv; returncode=$?
@@ -182,7 +182,7 @@ function ifAlias
     if [ -z $timeout ];then
         #snmptable to get Vlan Table
         snmpwalk -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os >> ${TmpDir}${name}_ifAlias_temp.csv; returncode=$?
-    	echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os"
+    	#echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os"
     else
         #snmptable to get Vlan Table
         snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os >> ${TmpDir}${name}_ifAlias_temp.csv; returncode=$?
@@ -209,7 +209,7 @@ function dot1dBasePortTable
     if [ -z $timeout ];then
         #snmptable to get generic information about every port
         snmptable -v 2c -m +ALL -c $snmpcom@1 $node -Cf , dot1dBasePortTable > /dev/null; returncode=$?
-    	echo "snmptable -v 2c -m +ALL -c $snmpcom@1 $node -Cf , dot1dBasePortTable"
+    	#echo "snmptable -v 2c -m +ALL -c $snmpcom@1 $node -Cf , dot1dBasePortTable"
     else
         #snmptable to get generic information about every port
         snmptable -r 1 -t $timeout -v 2c -m +ALL -c $snmpcom@1 $node -Cf , dot1dBasePortTable > /dev/null; returncode=$?
@@ -257,7 +257,7 @@ function dot1dTpFdbTable
     if [ -z $timeout ];then
         #snmptable to get @mac learned for the vlan 1
         snmptable -O0sUX -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable > /dev/null; returncode=$?
-    	echo "snmptable -O0sUX -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable"
+    	#echo "snmptable -O0sUX -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable"
     else
         #snmptable to get @mac learned for the vlan 1
         snmptable -r 1 -t $timeout -O0sUX -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable > /dev/null; returncode=$?
@@ -308,7 +308,7 @@ function vlanTrunkPortDynamicStatus
     if [ -z $timeout ];then
         #snmptable to get Vlan Table
         snmpwalk -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os >> ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv; returncode=$?
-    	echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os"
+    	#echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os"
     else
         #snmptable to get Vlan Table
         snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os >> ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv; returncode=$?
@@ -455,21 +455,6 @@ function EmptyCSV {
             echo "vmVlan is empty for "$name".Size : " $vmVlan >> ${SnmpEmpty}
             rm $filevmVlan
         fi
-    else
-        #Call SNMP function with timeout
-        #vmVlan $node $name $snmpcom 10
-        if [ -f $filevmVlan ];then
-            #Calcul the size of all files
-            vmVlan=$( stat -c %s ${loc}${name}_vmVlan.csv)
-            #Chech the size for vmVlan of the node to know if it empty
-            if [ $minimumsize -ge $vmVlan ]; then
-                echo "vmVlan is empty for "$name".Size : " $vmVlan >> ${SnmpEmpty}
-                rm $filevmVlan
-            fi
-        else
-            echo "vmVlan for "$name" doesn t exist" >> ${SnmpEmpty}
-            return 1
-        fi
     fi
 
     if [ -f $filevtpVlanTable ];then
@@ -479,21 +464,6 @@ function EmptyCSV {
         if [ $minimumsize -ge $vtpVlanTable ]; then
             echo "vtpVlanTable is empty for "$name".Size : " $vtpVlanTable >> ${SnmpEmpty}
             rm $filevtpVlanTable
-        fi
-    else
-        #Call SNMP function with timeout
-        #vtpVlanTable $node $name $snmpcom 10
-        if [ -f $filevtpVlanTable ];then
-            #Calcul the size of all files
-            vtpVlanTable=$( stat -c %s ${loc}${name}_vtpVlanTable.csv)
-            #Chech the size for vtpVlanTable of the node to know if it empty
-            if [ $minimumsize -ge $vtpVlanTable ]; then
-                echo "vtpVlanTable is empty for "$name".Size : " $vtpVlanTable >> ${SnmpEmpty}
-                rm $filevtpVlanTable
-            fi
-        else
-            echo "vtpVlanTable for "$name" doesn t exist" >> ${SnmpEmpty}
-            return 1
         fi
     fi
 
