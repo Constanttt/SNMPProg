@@ -387,12 +387,12 @@ function EmptyCSV {
     # Files to check
     fileifTable=${loc}${name}_ifTable.csv
     fileipAddrTable=${loc}${name}_ipAddrTable.csv
-    #filevmVlan=${loc}${name}_vmVlan.csv
-    #filevtpVlanTable=${loc}${name}_vtpVlanTable.csv
+    filevmVlan=${loc}${name}_vmVlan.csv
+    filevtpVlanTable=${loc}${name}_vtpVlanTable.csv
     fileifAlias=${loc}${name}_ifAlias.csv
     filedot1dBasePortTable=${loc}${name}_dot1dBasePortTable.csv
     filedot1dTpFdbTable=${loc}${name}_dot1dTpFdbTable.csv
-    #filevlanTrunkPortDynamicStatus=${loc}${name}_vlanTrunkPortDynamicStatus.csv
+    filevlanTrunkPortDynamicStatus=${loc}${name}_vlanTrunkPortDynamicStatus.csv
 
     #Minimum size required
     minimumsize=3
@@ -405,21 +405,6 @@ function EmptyCSV {
             echo "IfTable is empty for "$name".Size : " $ifTable >> ${SnmpEmpty}
             rm $fileifTable
         fi
-    else
-        #Call SNMP function with timeout
-        #ifTable $node $name $snmpcom 10
-        if [ -f $fileifTable ];then
-            #Calcul the size of all files
-            ifTable=$( stat -c %s ${loc}${name}_ifTable.csv)
-            #Chech the size for IfTable of the node to know if it empty
-            if [ $minimumsize -ge $ifTable ]; then
-                echo "IfTable is empty for "$name".Size : " $ifTable >> ${SnmpEmpty}
-                rm $fileifTable
-            fi
-        else
-            echo "IfTable for "$name" doesn't exist" >> ${SnmpEmpty}
-            return 1
-        fi
     fi
 
     if [ -f $fileipAddrTable ];then
@@ -429,21 +414,6 @@ function EmptyCSV {
         if [ $minimumsize -ge $ipAddrTable ]; then
             echo "ipAddrTable is empty for "$name".Size : " $ipAddrTable >> ${SnmpEmpty}
             rm $fileipAddrTable
-        fi
-    else
-        #Call SNMP function with timeout
-        #ipAddrTable $node $name $snmpcom 10
-        if [ -f $fileipAddrTable ];then
-            #Calcul the size of all files
-            ipAddrTable=$( stat -c %s ${loc}${name}_ipAddrTable.csv)
-            #Chech the size for ipAddrTable of the node to know if it empty
-            if [ $minimumsize -ge $ipAddrTable ]; then
-              echo "ipAddrTable is empty for "$name".Size : " $ipAddrTable >> ${SnmpEmpty}
-              rm $fileipAddrTable
-            fi
-        else
-            echo "ipAddrTable for "$name" doesn t exist" >> ${SnmpEmpty}
-            return 1
         fi
     fi
 
@@ -475,21 +445,6 @@ function EmptyCSV {
             echo "ifAlias is empty for "$name".Size : " $ifAlias >> ${SnmpEmpty}
             rm $fileifAlias
         fi
-    else
-        #Call SNMP function with timeout
-        #ifAlias $node $name $snmpcom 10
-        if [ -f $fileifAlias ];then
-            #Calcul the size of all files
-            ifAlias=$( stat -c %s ${loc}${name}_ifAlias.csv)
-            #Chech the size for ifAlias of the node to know if it empty
-            if [ $minimumsize -ge $ifAlias ]; then
-                echo "ifAlias is empty for "$name".Size : " $ifAlias >> ${SnmpEmpty}
-                rm $fileifAlias
-            fi
-        else
-            echo "ifAlias for "$name" doesn t exist" >> ${SnmpEmpty}
-            return 1
-        fi
     fi
     
     if [ -f $filevlanTrunkPortDynamicStatus ];then
@@ -499,21 +454,6 @@ function EmptyCSV {
         if [ $minimumsize -ge $vlanTrunkPortDynamicStatus ]; then
             echo "vlanTrunkPortDynamicStatus is empty for "$name".Size : " $vlanTrunkPortDynamicStatus >> ${SnmpEmpty}
             rm $filevlanTrunkPortDynamicStatus
-        fi
-    else
-        #Call SNMP function with timeout
-        #vlanTrunkPortDynamicStatus $node $name $snmpcom 10
-        if [ -f $filevlanTrunkPortDynamicStatus ];then
-            #Calcul the size of all files
-            vlanTrunkPortDynamicStatus=$( stat -c %s ${loc}${name}_vlanTrunkPortDynamicStatus.csv)
-            #Chech the size for vlanTrunkPortDynamicStatus of the node to know if it empty
-            if [ $minimumsize -ge $vlanTrunkPortDynamicStatus ]; then
-                echo "vlanTrunkPortDynamicStatus is empty for "$name".Size : " $vlanTrunkPortDynamicStatus >> ${SnmpEmpty}
-                rm $filevlanTrunkPortDynamicStatus
-            fi
-        else
-            echo "vlanTrunkPortDynamicStatus for "$name" doesn t exist" >> ${SnmpEmpty}
-            return 1
         fi
     fi
 }
@@ -553,7 +493,9 @@ do
         wait ${Id[${x}]}
         #Double check
         EmptyCSV ${equipment[${Id[${x}]}]} $snmpcom &
-        if [ $? -ne 0 ];then
+        Id2[${i}]=$!
+	wait ${Id2[${x}]}
+	if [ $? -ne 0 ];then
                     # get return and store it
                     echo "SNMP NOK for " ${equipment[${Id[${x}]}]} >> ${ErrEquip}
                     echo "SNMP NOK for " ${equipment[${Id[${x}]}]}
