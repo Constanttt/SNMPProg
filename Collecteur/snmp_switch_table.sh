@@ -1,6 +1,5 @@
 #!/bin/bash
 #
-# Authors : Valentin Ginard
 #
 # The script is build to parse equipments MIB in order to collect them and bring them in Splunk
 # To run this script you need to :
@@ -12,22 +11,19 @@
 ##################################################################################################
 
 #Storage of all CSV file
-loc="/mnt/share_infra/FileBuffer/snmp/"
-#loc="/tmp/snmptemp/csv/switch/"
+loc="/tmp/snmptemp/csv/switch/"
 
-#SNMP Community
-snmpcom="snmpcom"
+#SNMP Community for test
+#snmpcom="snmpcom"
 
 #Set invalid VLAN
 invalidvlans="100[2-5]"
 
-#Equipments List
-equipmentlist="/home/shared/lists/ip_switchs.list"
-#equipmentlist="/home/a638597/snmp/lists/ip_switch.list"
+#Equipments List for test
+#file=data.json
 
 #Set Workspace
-TmpDir="/tmp/snmp_switch_table/"
-#TmpDir="/tmp/snmptemp/switch/"
+TmpDir="/tmp/snmptemp/switch/"
 
 #Set error equipment file
 ErrEquip=${loc}snmp_switch_errors.err
@@ -36,10 +32,10 @@ ErrEquip=${loc}snmp_switch_errors.err
 SnmpEmpty=${loc}snmp_switch_empty.err
 
 #Mail to Send Error files
-mailaddress="valentin.ginard@rolex.com"
+mailaddress="valentin.ginard@etu.univ-smb.fr"
 
 # Set email sender
-senderaddress="noreply@rolex.com (Automated script on SV00567)"
+senderaddress="noreply@etu.univ-smb.fr (Automated script)"
 
 #If the folder of all CSV file doesn't exist create it
 if [ ! -d ${TmpDir} ]; then
@@ -66,7 +62,7 @@ fi
 function ifTable
 {
     #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
+    node=$1; name=$2; snmpcom=$3; timeout=$4
 
     #Check if we ask a timeout
     if [ -z $timeout ];then
@@ -92,7 +88,7 @@ function ifTable
 function ipAddrTable
 {
     #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
+    node=$1; name=$2; snmpcom=$3; timeout=$4
 
     #Check if we ask a timeout
     if [ -z $timeout ];then
@@ -116,7 +112,8 @@ function ipAddrTable
 function vmVlan
 {
     #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
+    node=$1; name=$2; snmpcom=$3; timeout=$4
+
     #We don't use the snmp table so we have to inject the header manually
     printf "IfIndex = IfIndexVTP\r\n" > ${TmpDir}${name}_vmVlan_temp.csv
     printf "IfIndex = IfIndexVTP\r\n" > ${loc}${name}_vmVlan.csv
@@ -144,7 +141,7 @@ function vmVlan
 function vtpVlanTable
 {
     #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
+    node=$1; name=$2; snmpcom=$3; timeout=$4
 
     #Check if we ask a timeout
     if [ -z $timeout ];then
@@ -167,47 +164,10 @@ function vtpVlanTable
     fi
 }
 
-function lldpRemSysName
-{
-    #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
-
-    #For this session I create a temporary file for cut it
-    #We don't use the snmp table so we have to inject the header manually
-    printf "IfIndex,lldp\r\n" >  ${loc}${name}_lldpRemSysName.csv
-    printf "IfIndex,lldp\r\n" >  ${TmpDir}${name}_lldpRemSysName_tempo.csv
-
-    #Check if we ask a timeout
-    if [ -z $timeout ];then
-        #snmptable to get lldp neighbors
-        snmpwalk -v 2c -m +ALL -c $snmpcom $node  lldpRemSysName -OQ -Os >> ${TmpDir}${name}_lldpRemSysName_tempo.csv; returncode=$?
-    else
-        #snmptable to get lldp neighbors
-        snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node  lldpRemSysName -OQ -Os >> ${TmpDir}${name}_lldpRemSysName_tempo.csv; returncode=$?
-    fi
-
-    if [ $returncode -ne 0 ];then
-        return 1
-    else
-        #Cut in all . and keep the end
-        cut -d . -f 3,4 ${TmpDir}${name}_lldpRemSysName_tempo.csv > ${TmpDir}${name}_lldpRemSysName_temp.csv
-        #Open the CSV file and replace all "." and all " = " by a ","
-        sed -i -e 's/\./,/g' -e 's/ = /,/g' ${TmpDir}${name}_lldpRemSysName_temp.csv
-        #Cut the file in order to keep the first and last part and inject it into the final CSV
-        cut -d, -f 1,3 ${TmpDir}${name}_lldpRemSysName_temp.csv > ${loc}${name}_lldpRemSysName.csv
-        #The last cut delete the ",value in the fist line so we put it back
-        sed -i -e 's/Port/Port,lldp/g' ${loc}${name}_lldpRemSysName.csv
-        #Delete the temporary file
-        rm ${TmpDir}${name}_lldpRemSysName_temp.csv
-    fi
-    #Delete the temporary file
-    rm ${TmpDir}${name}_lldpRemSysName_tempo.csv
-}
-
 function ifAlias
 {
     #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
+    node=$1; name=$2; snmpcom=$3; timeout=$4
 
     #We don't use the snmp table so we have to inject the header manually
     printf "IfIndex = Alias\r\n" > ${TmpDir}${name}_ifAlias_temp.csv
@@ -234,65 +194,10 @@ function ifAlias
     rm ${TmpDir}${name}_ifAlias_temp.csv
 }
 
-function cafPortConfigTable
-{
-    #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
-
-    #Check if we ask a timeout
-    if [ -z $timeout ];then
-        #snmptable to get the dot1x status of the port
-        snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , cafPortConfigTable > ${TmpDir}${name}_cafPortConfigTable_temp.csv; returncode=$?
-    else
-        #snmptable to get the dot1x status of the port
-        snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , cafPortConfigTable > ${TmpDir}${name}_cafPortConfigTable_temp.csv; returncode=$?
-    fi
-
-    if [ $returncode -ne 0 ];then
-        return 1
-    else
-        #Delete the three first lines
-        tail -n +3 ${TmpDir}${name}_cafPortConfigTable_temp.csv > ${loc}${name}_cafPortConfigTable.csv
-        #Open the CSV file and replace the header index by IfIndex for Splunk
-        sed -i 's/index/IfIndex/g' ${loc}${name}_cafPortConfigTable.csv
-        #Remove the temporary file
-        rm ${TmpDir}${name}_cafPortConfigTable_temp.csv
-    fi
-}
-
-function cafSessionTable
-{
-    #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
-
-    #Check if we ask a timeout
-    if [ -z $timeout ];then
-        #snmp to get session
-        snmptable -v 2c -m +ALL -c $snmpcom $node -Ox -Cb -Ci -Cf , cafSessionTable > ${TmpDir}${name}_cafSessionTable_temp.csv; returncode=$?
-    else
-        #snmp to get session
-        snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Ox -Cb -Ci -Cf , cafSessionTable > ${TmpDir}${name}_cafSessionTable_temp.csv; returncode=$?
-    fi
-
-    if [ $returncode -ne 0 ];then
-        return 1
-    else
-        #Cut in all ' and keep the 1st part and the end | Delete the 3 first lines
-        cut -d "'" -f 1,3 ${TmpDir}${name}_cafSessionTable_temp.csv| tail -n +3 > ${TmpDir}${name}_cafSessionTable_tempo.csv
-        #Open the CSV file and replace all .', by , and index by IfIndex for Splunk
-        sed -i -e "s/.',/,/g" -e 's/index/IfIndex/g' ${TmpDir}${name}_cafSessionTable_tempo.csv
-        #Delete ClientAddress
-        cut -d "," -f 1-3,5-21 ${TmpDir}${name}_cafSessionTable_tempo.csv > ${loc}${name}_cafSessionTable.csv
-        #Remove the temporary file
-        rm ${TmpDir}${name}_cafSessionTable_temp.csv
-        rm ${TmpDir}${name}_cafSessionTable_tempo.csv
-    fi
-}
-
 function dot1dBasePortTable
 {
     #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
+    node=$1; name=$2; snmpcom=$3; timeout=$4
 
     #Check if we ask a timeout
     if [ -z $timeout ];then
@@ -339,7 +244,7 @@ function dot1dBasePortTable
 function dot1dTpFdbTable
 {
     #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
+    node=$1; name=$2; snmpcom=$3; timeout=$4
 
     #Check if we ask a timeout
     if [ -z $timeout ];then
@@ -388,7 +293,7 @@ function dot1dTpFdbTable
 function vlanTrunkPortDynamicStatus 
 {
     #Get the first & second argument & third if exist
-    node=$1; name=$2; timeout=$3
+    node=$1; name=$2; snmpcom=$3; timeout=$4
     #We don't use the snmp table so we have to inject the header manually
     printf "IfIndex = Trunk\r\n" > ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv
     printf "IfIndex = Trunk\r\n" > ${loc}${name}_vlanTrunkPortDynamicStatus.csv
@@ -418,14 +323,14 @@ function vlanTrunkPortDynamicStatus
 function GetSNMP
 {
     #Get the first argument
-    node=$1
+    node=$1; snmpcom=$2
 
     #Get equipments name & Get returncode for snmp name equipment request
     name="$(snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0)"
     
     if [ -z $name ];then
         #Get equipments name & Get returncode for snmp name equipment request
-        name="$(snmpget -r 2 -t 60 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0)"
+        name="$(snmpget -r 2 -t 60 -v 2c -m +ALL -Ov -Oq -c $; name=$2; $node sysName.0)"
         if [ -z $name ];then
             name=$node
         fi
@@ -435,27 +340,21 @@ function GetSNMP
     if [ $? -eq 0 ]
     then
         #Call ifTable function with the IP and the name
-        ifTable $node $name
+        ifTable $node $name $snmpcom
         #Call ipAddrTable function with the IP and the name
-        ipAddrTable $node $name
+        ipAddrTable $node $name $snmpcom
         #Call vmVlan function with the IP and the name
-        vmVlan $node $name
+        #vmVlan $node $name $snmpcom
         #Call vtpVlanTable function with the IP and the name
-        vtpVlanTable $node $name
-        #Call lldpRemSysName function with the IP and the name
-        lldpRemSysName $node $name
+        #vtpVlanTable $node $name $snmpcom
         #Call ifAlias function with the IP and the name
-        ifAlias $node $name
-        #Call cafPortConfigTable function with the IP and the name
-        cafPortConfigTable  $node $name
-        #Call cafSessionTable function with the IP and the name
-        cafSessionTable $node $name
+        ifAlias $node $name $snmpcom
         #Call dot1dBasePortTable function with the IP and the name
-        dot1dBasePortTable $node $name
+        dot1dBasePortTable $node $name $snmpcom
         #Call dot1dTpFdbTable function with the IP and the name
-        dot1dTpFdbTable $node $name
+        dot1dTpFdbTable $node $name $snmpcom
         #Call vlanTrunkPortDynamicStatus function with the IP and the name
-        vlanTrunkPortDynamicStatus $node $name
+        vlanTrunkPortDynamicStatus $node $name $snmpcom
     else
         printf "$node --> KO \r\n"
     fi
@@ -482,10 +381,7 @@ function EmptyCSV {
     fileipAddrTable=${loc}${name}_ipAddrTable.csv
     filevmVlan=${loc}${name}_vmVlan.csv
     filevtpVlanTable=${loc}${name}_vtpVlanTable.csv
-    filelldpRemSysName=${loc}${name}_lldpRemSysName.csv
     fileifAlias=${loc}${name}_ifAlias.csv
-    filecafPortConfigTable=${loc}${name}_cafPortConfigTable.csv
-    filecafSessionTable=${loc}${name}_cafSessionTable.csv
     filedot1dBasePortTable=${loc}${name}_dot1dBasePortTable.csv
     filedot1dTpFdbTable=${loc}${name}_dot1dTpFdbTable.csv
     filevlanTrunkPortDynamicStatus=${loc}${name}_vlanTrunkPortDynamicStatus.csv
@@ -595,31 +491,6 @@ function EmptyCSV {
         fi
     fi
 
-    if [ -f $filelldpRemSysName ];then
-        #Calcul the size of all files
-        lldpRemSysName=$( stat -c %s ${loc}${name}_lldpRemSysName.csv)
-        #Chech the size for lldpRemSysnode of the node to know if it empty
-        if [ $minimumsize -ge $lldpRemSysName ]; then
-            #echo "lldpRemSysName is empty for "$name".Size : " $lldpRemSysName >> ${SnmpEmpty}
-            rm $filelldpRemSysName
-        fi
-    else
-        #Call SNMP function with timeout
-        lldpRemSysName $node $name 480
-        if [ -f $filelldpRemSysName ];then
-            #Calcul the size of all files
-            lldpRemSysName=$( stat -c %s ${loc}${name}_lldpRemSysName.csv)
-            #Chech the size for lldpRemSysnode of the node to know if it empty
-            if [ $minimumsize -ge $lldpRemSysName ]; then
-                #echo "lldpRemSysName is empty for "$name".Size : " $lldpRemSysName >> ${SnmpEmpty}
-                rm $filelldpRemSysName
-            fi
-        else
-            echo "lldpRemSysName for "$name" doesn't exist" >> ${SnmpEmpty}
-            return 1
-        fi
-    fi
-
     if [ -f $fileifAlias ];then
         #Calcul the size of all files
         ifAlias=$( stat -c %s ${loc}${name}_ifAlias.csv)
@@ -641,55 +512,6 @@ function EmptyCSV {
             fi
         else
             echo "ifAlias for "$name" doesn't exist" >> ${SnmpEmpty}
-            return 1
-        fi
-    fi
-
-    if [ -f $filecafPortConfigTable ];then
-        #Calcul the size of all files
-        cafPortConfigTable=$( stat -c %s ${loc}${name}_cafPortConfigTable.csv)
-        #Chech the size for cafPortConfigTable of the node to know if it empty
-        if [ $minimumsize -ge $cafPortConfigTable ]; then
-            echo "cafPortConfigTable is empty for "$name".Size : " $cafPortConfigTable >> ${SnmpEmpty}
-            rm $filecafPortConfigTable
-        fi
-    else
-        #Call SNMP function with timeou
-        cafPortConfigTable $node $name 480
-        if [ -f $filecafPortConfigTable ];then
-            #Calcul the size of all files
-            cafPortConfigTable=$( stat -c %s ${loc}${name}_cafPortConfigTable.csv)
-            #Chech the size for cafPortConfigTable of the node to know if it empty
-            if [ $minimumsize -ge $cafPortConfigTable ]; then
-                echo "cafPortConfigTable is empty for "$name".Size : " $cafPortConfigTable >> ${SnmpEmpty}
-                rm $filecafPortConfigTable
-            fi
-        else
-            echo "cafPortConfigTable for "$name" doesn t exist" >> ${SnmpEmpty}
-            return 1
-        fi
-    fi
-
-    if [ -f $filecafSessionTable ];then
-        #Calcul the size of all files
-        cafSessionTable=$( stat -c %s ${loc}${name}_cafSessionTable.csv)
-        #Chech the size for cafSessionTable of the node to know if it empty
-        if [ $minimumsize -ge $cafSessionTable ]; then
-            #echo "cafSessionTable is empty for "$name".Size : " $cafSessionTable >> ${SnmpEmpty}
-            rm $filecafSessionTable
-        fi
-    else
-        #Call SNMP function with timeout
-        cafSessionTable $node $name 480
-        if [ -f $filecafSessionTable ];then
-            cafSessionTable=$( stat -c %s ${loc}${name}_cafSessionTable.csv)
-            #Chech the size for cafSessionTable of the node to know if it empty
-            if [ $minimumsize -ge $cafSessionTable ]; then
-                #echo "cafSessionTable is empty for "$name".Size : " $cafSessionTable >> ${SnmpEmpty}
-                rm $filecafSessionTable
-            fi
-        else
-            echo "cafSessionTable for "$name" doesn't exist" >> ${SnmpEmpty}
             return 1
         fi
     fi
@@ -728,18 +550,24 @@ j=1
 start=$(date +"%T")
 StartDate=$(date -u -d "$start" +"%s")
 
-#Foreach Node in the equipmentlist
-for Node in $(cat $equipmentlist);do
+#curl -s https://data.nasa.gov/d.json | jq . > $file
+size="$(jq length $file)"
+for (( i=0; i<$size; i++ ))
+do
+    node="$(jq -r ".[$i].ip" data.json)"
+    snmpcom="$(jq -r ".[$i].community" data.json)"
+    echo $node
+    echo $snmpcom
     #Ping and snmp request
-    ping $Node -c 1 -w 1 &> /dev/null && snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $Node sysName.0 &> /dev/null
+    ping $node -c 1 -w 1 &> /dev/null && snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0 &> /dev/null
     #Check return code
     if [ $? -eq 0 ];then
         #Exec the function GetSNMP with as param the name of the equipment
-        GetSNMP $Node &
+        GetSNMP $node $snmpcom &
         #Get the PID of the function
         Id[${i}]=$!
         #Store tehe PID
-        equipment[${Id[${i}]}]=$Node
+        equipment[${Id[${i}]}]=$node
         #Run 10 process
         R=$((${i}%10))
         #If R is a "modulo" of 10
@@ -764,8 +592,8 @@ for Node in $(cat $equipmentlist);do
         fi
         let i=${i}+1
     else
-        echo "Ping or SNMP no answered for " $Node >> ${ErrEquip}
-        echo "Ping or SNMP no answered for " $Node
+        echo "Ping or SNMP no answered for " $node >> ${ErrEquip}
+        echo "Ping or SNMP no answered for " $node
     fi
 done
 
