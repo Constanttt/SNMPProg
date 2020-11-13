@@ -78,7 +78,7 @@ def main():
         
     words = ['ifTable','ipAddrTable','vmVlan','vtpVlanTable','ifAlias','dot1dBasePortTable','dot1dTpFdbTable','vlanTrunkPortDynamicStatus']
     for i in words:
-        func = print (i)
+        func = str(i)
         getattr(func, lambda: default)()
 
 if __name__ == "__main__":
