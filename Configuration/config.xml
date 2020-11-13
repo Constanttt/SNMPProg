@@ -1,11 +1,8 @@
 <configuration>
     <switch>
             <device ip="192.168.1.54" community="snmpcom" />
-            <device ip="192.168.1.20" community="snmpcom" />
     </switch>
     <router>
-        <device ip="192.168.1.15" community="snmpcom" />
-        <device ip="192.168.1.25" community="snmpcom" />
     </router>
     <pc>
 	    <device ip="192.168.1.2" community="public"/>

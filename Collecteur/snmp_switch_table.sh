@@ -20,7 +20,7 @@ loc="/tmp/snmptemp/csv/switch/"
 invalidvlans="100[2-5]"
 
 #Equipments List for test
-#file=data.json
+file=${TmpDir}data.json
 
 #Set Workspace
 TmpDir="/tmp/snmptemp/switch/"
@@ -68,6 +68,7 @@ function ifTable
     if [ -z $timeout ];then
         #snmptable to get the show interface
         snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${name}_ifTable_temp.csv; returncode=$?
+        echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable"
     else
         #snmptable to get the show interface
         snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${name}_ifTable_temp.csv; returncode=$?
@@ -94,6 +95,7 @@ function ipAddrTable
     if [ -z $timeout ];then
         #snmptable to get IP address table
         snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable > ${TmpDir}${name}_ipAddrTable_temp.csv; returncode=$?
+    	echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable"
     else
         #snmptable to get IP address table
         snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable > ${TmpDir}${name}_ipAddrTable_temp.csv; returncode=$?
@@ -109,18 +111,20 @@ function ipAddrTable
     fi
 }
 
+
 function vmVlan
 {
     #Get the first & second argument & third if exist
     node=$1; name=$2; snmpcom=$3; timeout=$4
 
-    #We don't use the snmp table so we have to inject the header manually
+    #We don t use the snmp table so we have to inject the header manually
     printf "IfIndex = IfIndexVTP\r\n" > ${TmpDir}${name}_vmVlan_temp.csv
     printf "IfIndex = IfIndexVTP\r\n" > ${loc}${name}_vmVlan.csv
     #Check if we ask a timeout
     if [ -z $timeout ];then
         #snmptable to get Vlan Table
         snmpwalk -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os >> ${TmpDir}${name}_vmVlan_temp.csv; returncode=$?
+    	echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os"
     else
         #snmptable to get Vlan Table
         snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os >> ${TmpDir}${name}_vmVlan_temp.csv; returncode=$?
@@ -147,6 +151,7 @@ function vtpVlanTable
     if [ -z $timeout ];then
         #snmptable to get VTP
         snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable > ${TmpDir}${name}_vtpVlanTable_temp.csv; returncode=$?
+    	echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable"
     else
         #snmptable to get VTP
         snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable > ${TmpDir}${name}_vtpVlanTable_temp.csv; returncode=$?
@@ -177,6 +182,7 @@ function ifAlias
     if [ -z $timeout ];then
         #snmptable to get Vlan Table
         snmpwalk -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os >> ${TmpDir}${name}_ifAlias_temp.csv; returncode=$?
+    	echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os"
     else
         #snmptable to get Vlan Table
         snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os >> ${TmpDir}${name}_ifAlias_temp.csv; returncode=$?
@@ -203,6 +209,7 @@ function dot1dBasePortTable
     if [ -z $timeout ];then
         #snmptable to get generic information about every port
         snmptable -v 2c -m +ALL -c $snmpcom@1 $node -Cf , dot1dBasePortTable > /dev/null; returncode=$?
+    	echo "snmptable -v 2c -m +ALL -c $snmpcom@1 $node -Cf , dot1dBasePortTable"
     else
         #snmptable to get generic information about every port
         snmptable -r 1 -t $timeout -v 2c -m +ALL -c $snmpcom@1 $node -Cf , dot1dBasePortTable > /dev/null; returncode=$?
@@ -250,16 +257,16 @@ function dot1dTpFdbTable
     if [ -z $timeout ];then
         #snmptable to get @mac learned for the vlan 1
         snmptable -O0sUX -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable > /dev/null; returncode=$?
+    	echo "snmptable -O0sUX -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable"
     else
         #snmptable to get @mac learned for the vlan 1
         snmptable -r 1 -t $timeout -O0sUX -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable > /dev/null; returncode=$?
     fi
 
-    if [ $returncode -eq 0 ]
-    then
+    if [ $returncode -eq 0 ];then
     printf "Address,Port,Status\r\n" > ${TmpDir}${name}_dot1dTpFdbTable_temp.csv
      
-    if [ -z $timeout ];then
+    	if [ -z $timeout ];then
             snmptable -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${name}_dot1dTpFdbTable_temp.csv; return=$?
         else
             snmptable -r 1 -t $timeout -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${name}_dot1dTpFdbTable_temp.csv; return=$?
@@ -301,6 +308,7 @@ function vlanTrunkPortDynamicStatus
     if [ -z $timeout ];then
         #snmptable to get Vlan Table
         snmpwalk -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os >> ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv; returncode=$?
+    	echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os"
     else
         #snmptable to get Vlan Table
         snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os >> ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv; returncode=$?
@@ -354,7 +362,7 @@ function GetSNMP
         #Call dot1dTpFdbTable function with the IP and the name
         dot1dTpFdbTable $node $name $snmpcom
         #Call vlanTrunkPortDynamicStatus function with the IP and the name
-        vlanTrunkPortDynamicStatus $node $name $snmpcom
+        #vlanTrunkPortDynamicStatus $node $name $snmpcom
     else
         printf "$node --> KO \r\n"
     fi
@@ -363,7 +371,7 @@ function GetSNMP
 function EmptyCSV {
 
     #Get the first argument
-    node=$1
+    node=$1; snmpcom=$2;
 
     #Get equipments name & Get returncode for snmp name equipment request
     name="$(snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0)"
@@ -379,17 +387,15 @@ function EmptyCSV {
     # Files to check
     fileifTable=${loc}${name}_ifTable.csv
     fileipAddrTable=${loc}${name}_ipAddrTable.csv
-    filevmVlan=${loc}${name}_vmVlan.csv
-    filevtpVlanTable=${loc}${name}_vtpVlanTable.csv
+    #filevmVlan=${loc}${name}_vmVlan.csv
+    #filevtpVlanTable=${loc}${name}_vtpVlanTable.csv
     fileifAlias=${loc}${name}_ifAlias.csv
     filedot1dBasePortTable=${loc}${name}_dot1dBasePortTable.csv
     filedot1dTpFdbTable=${loc}${name}_dot1dTpFdbTable.csv
-    filevlanTrunkPortDynamicStatus=${loc}${name}_vlanTrunkPortDynamicStatus.csv
+    #filevlanTrunkPortDynamicStatus=${loc}${name}_vlanTrunkPortDynamicStatus.csv
 
     #Minimum size required
     minimumsize=3
-
-    timeoutiftable=700
 
     if [ -f $fileifTable ];then
         #Calcul the size of all files
@@ -401,7 +407,7 @@ function EmptyCSV {
         fi
     else
         #Call SNMP function with timeout
-        ifTable $node $name $timeoutiftable
+        #ifTable $node $name $snmpcom 10
         if [ -f $fileifTable ];then
             #Calcul the size of all files
             ifTable=$( stat -c %s ${loc}${name}_ifTable.csv)
@@ -426,7 +432,7 @@ function EmptyCSV {
         fi
     else
         #Call SNMP function with timeout
-        ipAddrTable $node $name 700
+        #ipAddrTable $node $name $snmpcom 10
         if [ -f $fileipAddrTable ];then
             #Calcul the size of all files
             ipAddrTable=$( stat -c %s ${loc}${name}_ipAddrTable.csv)
@@ -436,7 +442,7 @@ function EmptyCSV {
               rm $fileipAddrTable
             fi
         else
-            echo "ipAddrTable for "$name" doesn't exist" >> ${SnmpEmpty}
+            echo "ipAddrTable for "$name" doesn t exist" >> ${SnmpEmpty}
             return 1
         fi
     fi
@@ -451,7 +457,7 @@ function EmptyCSV {
         fi
     else
         #Call SNMP function with timeout
-        vmVlan $node $name 480
+        #vmVlan $node $name $snmpcom 10
         if [ -f $filevmVlan ];then
             #Calcul the size of all files
             vmVlan=$( stat -c %s ${loc}${name}_vmVlan.csv)
@@ -461,7 +467,7 @@ function EmptyCSV {
                 rm $filevmVlan
             fi
         else
-            echo "vmVlan for "$name" doesn't exist" >> ${SnmpEmpty}
+            echo "vmVlan for "$name" doesn t exist" >> ${SnmpEmpty}
             return 1
         fi
     fi
@@ -476,7 +482,7 @@ function EmptyCSV {
         fi
     else
         #Call SNMP function with timeout
-        vtpVlanTable $node $name 480
+        #vtpVlanTable $node $name $snmpcom 10
         if [ -f $filevtpVlanTable ];then
             #Calcul the size of all files
             vtpVlanTable=$( stat -c %s ${loc}${name}_vtpVlanTable.csv)
@@ -486,7 +492,7 @@ function EmptyCSV {
                 rm $filevtpVlanTable
             fi
         else
-            echo "vtpVlanTable for "$name" doesn't exist" >> ${SnmpEmpty}
+            echo "vtpVlanTable for "$name" doesn t exist" >> ${SnmpEmpty}
             return 1
         fi
     fi
@@ -501,7 +507,7 @@ function EmptyCSV {
         fi
     else
         #Call SNMP function with timeout
-        ifAlias $node $name 480
+        #ifAlias $node $name $snmpcom 10
         if [ -f $fileifAlias ];then
             #Calcul the size of all files
             ifAlias=$( stat -c %s ${loc}${name}_ifAlias.csv)
@@ -511,7 +517,7 @@ function EmptyCSV {
                 rm $fileifAlias
             fi
         else
-            echo "ifAlias for "$name" doesn't exist" >> ${SnmpEmpty}
+            echo "ifAlias for "$name" doesn t exist" >> ${SnmpEmpty}
             return 1
         fi
     fi
@@ -526,7 +532,7 @@ function EmptyCSV {
         fi
     else
         #Call SNMP function with timeout
-        vlanTrunkPortDynamicStatus $node $name 480
+        #vlanTrunkPortDynamicStatus $node $name $snmpcom 10
         if [ -f $filevlanTrunkPortDynamicStatus ];then
             #Calcul the size of all files
             vlanTrunkPortDynamicStatus=$( stat -c %s ${loc}${name}_vlanTrunkPortDynamicStatus.csv)
@@ -536,11 +542,12 @@ function EmptyCSV {
                 rm $filevlanTrunkPortDynamicStatus
             fi
         else
-            echo "vlanTrunkPortDynamicStatus for "$name" doesn't exist" >> ${SnmpEmpty}
+            echo "vlanTrunkPortDynamicStatus for "$name" doesn t exist" >> ${SnmpEmpty}
             return 1
         fi
     fi
 }
+
 
 #Define Variables
 i=1
@@ -550,14 +557,18 @@ j=1
 start=$(date +"%T")
 StartDate=$(date -u -d "$start" +"%s")
 
-#curl -s https://data.nasa.gov/d.json | jq . > $file
+#Debug
+echo "~~~~~~~Start : $start~~~~~~ "
+
+curl 127.0.0.1:5000/api/devices | jq . > $file
 size="$(jq length $file)"
-for (( i=0; i<$size; i++ ))
+for (( i=0; i < $size; i++ ))
 do
+    echo "\n\r~~~~~~~Start i=$i~~~~~~"
     node="$(jq -r ".[$i].ip" data.json)"
     snmpcom="$(jq -r ".[$i].community" data.json)"
-    echo $node
-    echo $snmpcom
+    echo "node : $node"
+    echo "community : $snmpcom"
     #Ping and snmp request
     ping $node -c 1 -w 1 &> /dev/null && snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0 &> /dev/null
     #Check return code
@@ -568,76 +579,35 @@ do
         Id[${i}]=$!
         #Store tehe PID
         equipment[${Id[${i}]}]=$node
-        #Run 10 process
-        R=$((${i}%10))
-        #If R is a "modulo" of 10
-        if [[ $R = 0 ]];then
-            # For x=j higher or equal of i incr x
-            for ((x=${j}; x <= ${i}; x++));do
-                # Wait the end of the function
-                wait ${Id[${x}]}
-                #Double check
-                EmptyCSV ${equipment[${Id[${x}]}]} &
-                if [ $? -ne 0 ];then
+        # Wait the end of the function
+        wait ${Id[${x}]}
+        #Double check
+        EmptyCSV ${equipment[${Id[${x}]}]} $snmpcom &
+        if [ $? -ne 0 ];then
                     # get return and store it
                     echo "SNMP NOK for " ${equipment[${Id[${x}]}]} >> ${ErrEquip}
                     echo "SNMP NOK for " ${equipment[${Id[${x}]}]}
-                else
+        else
                     # get return
                     echo "SNMP OK for " ${equipment[${Id[${x}]}]}
-                fi
-            done
-            #incr j by i value +1
-            let j=${i}+1
         fi
-        let i=${i}+1
     else
         echo "Ping or SNMP no answered for " $node >> ${ErrEquip}
         echo "Ping or SNMP no answered for " $node
     fi
 done
 
-#if R is not a "modulo" of 10
-if [ $R != 0 ];then
-    for ((x=${j}; x < ${i}; x++));do
-        # Wait the end of the function
-        wait ${Id[${x}]}
-        #double check
-        EmptyCSV ${equipment[${Id[${x}]}]} &
-        if [ $? -ne 0 ];then
-            # get return and store it
-            echo "SNMP NOK for " ${equipment[${Id[${x}]}]} >> ${ErrEquip}
-            echo "SNMP NOK for " ${equipment[${Id[${x}]}]}
-        else
-            # get return
-            echo "SNMP OK for " ${equipment[${Id[${x}]}]}
-        fi
-    done
-    let j=${i}+1
-fi
-
-#Register start time
 end=$(date +"%T")
 FinalDate=$(date -u -d "$end" +"%s")
 
 duration=$(date -u -d "0 $FinalDate sec - $StartDate sec" +"%H:%M:%S")
 
-if [[ -f $ErrEquip && -f $SnmpEmpty ]];then
-    # Send a mail which say the reason of the error
-    subject="Script SNMP Switch error";
-    echo "`date`
-    Script duration: $duration minutes
-    Error processing script please look at logfile attached" | mailx -r "$sender" -s "$subject" -a "${ErrEquip}" -a "${SnmpEmpty}" $mailaddress;
-elif [ -f $ErrEquip ];then
-    # Send a mail which say the reason of the error
-    subject="Script SNMP Switch error";
-    echo "`date`
-    Script duration: $duration minutes
-    Error processing script please look at logfile attached" | mailx -r "$sender" -s "$subject" -a "${ErrEquip}" $mailaddress;
-elif [ -f $SnmpEmpty ];then
-    # Send a mail which say the reason of the error
-    subject="Script SNMP Switch error";
-    echo "`date`
-    Script duration: $duration minutes
-    Error processing script please look at logfile attached" | mailx -r "$sender" -s "$subject" -a "${SnmpEmpty}" $mailaddress;
+
+#Check is the error file if exist
+if [ -f $file ]
+then
+        #Clear the error equipment file
+        rm ${file}
 fi
+
+echo "$FinalDate : END"
