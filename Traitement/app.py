@@ -1,81 +1,101 @@
 import os
 import csv
 import re
+import time
 from os.path import getsize
 
 def ifTable(file):
+    print(file)
     with open(file) as csvDataFile:
         print("ifTable")
-        print(file)
         csvReader = csv.reader(csvDataFile)
         for row in csvReader:
             print(row)
+        time.sleep(.300)
+        os.remove(file)
+        
 
 def ipAddrTable(file):
+    print(file)
     with open(file) as csvDataFile:
         print("ipAddrTable")
-        print(file)
         csvReader = csv.reader(csvDataFile)
         for row in csvReader:
             print(row)
+        time.sleep(.300)
+        os.remove(file)
 
 def vtpVlanTable(file):
+    print(file)
     with open(file) as csvDataFile:
         print("vtpVlanTable")
-        print(file)
         csvReader = csv.reader(csvDataFile)
         for row in csvReader:
             print(row)
+        time.sleep(.300)
+        os.remove(file)
 
 def vmVlan(file):
+    print(file)
     with open(file) as csvDataFile:
         print("vmVlan")
-        print(file)
         csvReader = csv.reader(csvDataFile)
         for row in csvReader:
             print(row)
+        time.sleep(.300)
+        os.remove(file)
 
 def ifAlias(file):
+    print(file)
     with open(file) as csvDataFile:
         print("ifAlias")
-        print(file)
         csvReader = csv.reader(csvDataFile)
         for row in csvReader:
             print(row)
+        time.sleep(.300)
+        os.remove(file)
 
 def dot1dBasePortTable(file):
+    print(file)
     with open(file) as csvDataFile:
         print("dot1dBasePortTable")
-        print(file)
         csvReader = csv.reader(csvDataFile)
         for row in csvReader:
             print(row)
+        time.sleep(.300)
+        os.remove(file)
 
 def dot1dTpFdbTable(file):
+    print(file)
     with open(file) as csvDataFile:
         print("dot1dTpFdbTable")
-        print(file)
         csvReader = csv.reader(csvDataFile)
         for row in csvReader:
             print(row)
+        time.sleep(.300)
+        os.remove(file)
 
-def vlanTrunkPortDynamicStatus():
+def vlanTrunkPortDynamicStatus(file):
+    print(file)
     with open(file) as csvDataFile:
         print("vlanTrunkPortDynamicStatus")
-        print(file)
         csvReader = csv.reader(csvDataFile)
         for row in csvReader:
             print(row)
+        time.sleep(.300)
+        os.remove(file)
 
 def main():
-    os.chdir("/tmp/snmptemp/csv/switch/")
-    path = "/tmp/snmptemp/csv/switch/"
+    os.chdir("/tmp/snmptemp/csv/")
+    path = "/tmp/snmptemp/csv/"
     directories = os.listdir(path)
 
     for file in directories:
         file_size = getsize(file)
         if file_size == 0:
             os.remove(file)
+            break
+        time.sleep(.300)
 
         #words = ['ifTable','ipAddrTable','vmVlan','vtpVlanTable','ifAlias','dot1dBasePortTable','dot1dTpFdbTable','vlanTrunkPortDynamicStatus']
         if re.match('.*ifTable.*', file):

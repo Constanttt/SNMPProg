@@ -11,7 +11,7 @@
 ##################################################################################################
 
 #Storage of all CSV file
-loc="/tmp/snmptemp/csv/switch/"
+loc="/tmp/snmptemp/csv/"
 
 #SNMP Community for test
 #snmpcom="snmpcom"
@@ -23,19 +23,13 @@ invalidvlans="100[2-5]"
 file=${TmpDir}data.json
 
 #Set Workspace
-TmpDir="/tmp/snmptemp/switch/"
+TmpDir="/tmp/snmptemp/tmp/"
 
 #Set error equipment file
-ErrEquip=${loc}snmp_switch_errors.err
+ErrEquip=${loc}snmp_errors.err
 
 #Set error file for emptyCSV to analyse
-SnmpEmpty=${loc}snmp_switch_empty.err
-
-#Mail to Send Error files
-mailaddress="valentin.ginard@etu.univ-smb.fr"
-
-# Set email sender
-senderaddress="noreply@etu.univ-smb.fr (Automated script)"
+SnmpEmpty=${loc}snmp_empty.err
 
 #If the folder of all CSV file doesn't exist create it
 if [ ! -d ${TmpDir} ]; then
@@ -351,10 +345,6 @@ function GetSNMP
         ifTable $node $name $snmpcom
         #Call ipAddrTable function with the IP and the name
         ipAddrTable $node $name $snmpcom
-        #Call vmVlan function with the IP and the name
-        #vmVlan $node $name $snmpcom
-        #Call vtpVlanTable function with the IP and the name
-        #vtpVlanTable $node $name $snmpcom
         #Call ifAlias function with the IP and the name
         ifAlias $node $name $snmpcom
         #Call dot1dBasePortTable function with the IP and the name
@@ -362,7 +352,7 @@ function GetSNMP
         #Call dot1dTpFdbTable function with the IP and the name
         dot1dTpFdbTable $node $name $snmpcom
         #Call vlanTrunkPortDynamicStatus function with the IP and the name
-        #vlanTrunkPortDynamicStatus $node $name $snmpcom
+        vlanTrunkPortDynamicStatus $node $name $snmpcom
     else
         printf "$node --> KO \r\n"
     fi
@@ -387,8 +377,8 @@ function EmptyCSV {
     # Files to check
     fileifTable=${loc}${name}_ifTable.csv
     fileipAddrTable=${loc}${name}_ipAddrTable.csv
-    filevmVlan=${loc}${name}_vmVlan.csv
-    filevtpVlanTable=${loc}${name}_vtpVlanTable.csv
+    #filevmVlan=${loc}${name}_vmVlan.csv
+    #filevtpVlanTable=${loc}${name}_vtpVlanTable.csv
     fileifAlias=${loc}${name}_ifAlias.csv
     filedot1dBasePortTable=${loc}${name}_dot1dBasePortTable.csv
     filedot1dTpFdbTable=${loc}${name}_dot1dTpFdbTable.csv
@@ -417,26 +407,6 @@ function EmptyCSV {
         fi
     fi
 
-    if [ -f $filevmVlan ];then
-        #Calcul the size of all files
-        vmVlan=$( stat -c %s ${loc}${name}_vmVlan.csv)
-        #Chech the size for vmVlan of the node to know if it empty
-        if [ $minimumsize -ge $vmVlan ]; then
-            echo "vmVlan is empty for "$name".Size : " $vmVlan >> ${SnmpEmpty}
-            rm $filevmVlan
-        fi
-    fi
-
-    if [ -f $filevtpVlanTable ];then
-        #Calcul the size of all files
-        vtpVlanTable=$( stat -c %s ${loc}${name}_vtpVlanTable.csv)
-        #Chech the size for vtpVlanTable of the node to know if it empty
-        if [ $minimumsize -ge $vtpVlanTable ]; then
-            echo "vtpVlanTable is empty for "$name".Size : " $vtpVlanTable >> ${SnmpEmpty}
-            rm $filevtpVlanTable
-        fi
-    fi
-
     if [ -f $fileifAlias ];then
         #Calcul the size of all files
         ifAlias=$( stat -c %s ${loc}${name}_ifAlias.csv)
@@ -457,11 +427,6 @@ function EmptyCSV {
         fi
     fi
 }
-
-
-#Define Variables
-i=1
-j=1
 
 #Register start time
 start=$(date +"%T")
