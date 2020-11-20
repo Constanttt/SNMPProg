@@ -106,7 +106,7 @@ Son but principal étant de traiter les données du collecteur pour ensuite les 
 Il est codé en python ou il lis les fichiers CSV, fait du nettoyage pour les fichiers qui pourraient avoir des problèmes.
 Ensuite nous envoyons les données au serveur de base de données.
 
-Dans ce 
+Ce module n'a pas besoin d'installation spéciale, tous est codé en python avec les paquets par défault.
 
 #### Module de log
 
