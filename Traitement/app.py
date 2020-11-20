@@ -1,8 +1,9 @@
 import os
 import csv
+import re
 from os.path import getsize
 
-def ifTable():
+def ifTable(file):
     with open(file) as csvDataFile:
         print("ifTable")
         print(file)
@@ -10,7 +11,7 @@ def ifTable():
         for row in csvReader:
             print(row)
 
-def ipAddrTable():
+def ipAddrTable(file):
     with open(file) as csvDataFile:
         print("ipAddrTable")
         print(file)
@@ -18,7 +19,7 @@ def ipAddrTable():
         for row in csvReader:
             print(row)
 
-def vtpVlanTable():
+def vtpVlanTable(file):
     with open(file) as csvDataFile:
         print("vtpVlanTable")
         print(file)
@@ -26,7 +27,7 @@ def vtpVlanTable():
         for row in csvReader:
             print(row)
 
-def vmVlan():
+def vmVlan(file):
     with open(file) as csvDataFile:
         print("vmVlan")
         print(file)
@@ -34,7 +35,7 @@ def vmVlan():
         for row in csvReader:
             print(row)
 
-def ifAlias():
+def ifAlias(file):
     with open(file) as csvDataFile:
         print("ifAlias")
         print(file)
@@ -42,7 +43,7 @@ def ifAlias():
         for row in csvReader:
             print(row)
 
-def dot1dBasePortTable():
+def dot1dBasePortTable(file):
     with open(file) as csvDataFile:
         print("dot1dBasePortTable")
         print(file)
@@ -50,7 +51,7 @@ def dot1dBasePortTable():
         for row in csvReader:
             print(row)
 
-def dot1dTpFdbTable():
+def dot1dTpFdbTable(file):
     with open(file) as csvDataFile:
         print("dot1dTpFdbTable")
         print(file)
@@ -75,11 +76,26 @@ def main():
         file_size = getsize(file)
         if file_size == 0:
             os.remove(file)
-        
-    words = ['ifTable','ipAddrTable','vmVlan','vtpVlanTable','ifAlias','dot1dBasePortTable','dot1dTpFdbTable','vlanTrunkPortDynamicStatus']
-    for i in words:
-        func = str(i)
-        getattr(func, lambda: default)()
+
+        #words = ['ifTable','ipAddrTable','vmVlan','vtpVlanTable','ifAlias','dot1dBasePortTable','dot1dTpFdbTable','vlanTrunkPortDynamicStatus']
+        if re.match('.*ifTable.*', file):
+            ifTable(file)
+        elif re.match('.*ipAddrTable.*', file):
+            ipAddrTable(file)
+        elif re.match('.*vmVlan.*', file):
+            vmVlan(file)
+        elif re.match('.*vtpVlanTable.*', file):
+            vtpVlanTable(file)
+        elif re.match('.*ifAlias.*', file):
+            ifAlias(file)
+        elif re.match('.*dot1dBasePortTable.*', file):
+            dot1dBasePortTable(file)
+        elif re.match('.*dot1dTpFdbTable.*', file):
+            dot1dTpFdbTable(file)
+        elif re.match('.*vlanTrunkPortDynamicStatus.*', file):
+            vlanTrunkPortDynamicStatus(file)
+        else:
+            print("Name of the file incorrect")
 
 if __name__ == "__main__":
     main()
