@@ -61,22 +61,22 @@ function ifTable
     #Check if we ask a timeout
     if [ -z $timeout ];then
         #snmptable to get the show interface
-        snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${name}_ifTable_temp.csv; returncode=$?
+        snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${node}_${name}_ifTable_temp.csv; returncode=$?
         #echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable"
     else
         #snmptable to get the show interface
-        snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${name}_ifTable_temp.csv; returncode=$?
+        snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${node}_${name}_ifTable_temp.csv; returncode=$?
     fi
 
     if [ $returncode -ne 0 ];then
        return 1
     else
         #Delete the three first lines
-        tail -n +3 ${TmpDir}${name}_ifTable_temp.csv > ${loc}${name}_ifTable.csv
+        tail -n +3 ${TmpDir}${node}_${name}_ifTable_temp.csv > ${loc}${node}_${name}_ifTable.csv
         #Open the CSV file and replace Index by IfIndex for Splunk
-        sed -i 's/Index/IfIndex/g' ${loc}${name}_ifTable.csv
+        sed -i 's/Index/IfIndex/g' ${loc}${node}_${name}_ifTable.csv
         #Remove the temporary file
-        rm ${TmpDir}${name}_ifTable_temp.csv
+        rm ${TmpDir}${node}_${name}_ifTable_temp.csv
     fi
 }
 
@@ -88,20 +88,20 @@ function ipAddrTable
     #Check if we ask a timeout
     if [ -z $timeout ];then
         #snmptable to get IP address table
-        snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable > ${TmpDir}${name}_ipAddrTable_temp.csv; returncode=$?
+        snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable > ${TmpDir}${node}_${name}_ipAddrTable_temp.csv; returncode=$?
     	#echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable"
     else
         #snmptable to get IP address table
-        snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable > ${TmpDir}${name}_ipAddrTable_temp.csv; returncode=$?
+        snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ipAddrTable > ${TmpDir}${node}_${name}_ipAddrTable_temp.csv; returncode=$?
     fi
 
     if [ $returncode -ne 0 ];then
        return 1
     else
         #Delete the three first lines
-        tail -n +3 ${TmpDir}${name}_ipAddrTable_temp.csv > ${loc}${name}_ipAddrTable.csv
+        tail -n +3 ${TmpDir}${node}_${name}_ipAddrTable_temp.csv > ${loc}${node}_${name}_ipAddrTable.csv
         #Remove the temporary file
-        rm ${TmpDir}${name}_ipAddrTable_temp.csv
+        rm ${TmpDir}${node}_${name}_ipAddrTable_temp.csv
     fi
 }
 
@@ -112,28 +112,28 @@ function vmVlan
     node=$1; name=$2; snmpcom=$3; timeout=$4
 
     #We don t use the snmp table so we have to inject the header manually
-    printf "IfIndex = IfIndexVTP\r\n" > ${TmpDir}${name}_vmVlan_temp.csv
-    printf "IfIndex = IfIndexVTP\r\n" > ${loc}${name}_vmVlan.csv
+    printf "IfIndex = IfIndexVTP\r\n" > ${TmpDir}${node}_${name}_vmVlan_temp.csv
+    printf "IfIndex = IfIndexVTP\r\n" > ${loc}${node}_${name}_vmVlan.csv
     #Check if we ask a timeout
     if [ -z $timeout ];then
         #snmptable to get Vlan Table
-        snmpwalk -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os >> ${TmpDir}${name}_vmVlan_temp.csv; returncode=$?
+        snmpwalk -v 2c -c $snmpcom $node 1.3.6.1.4.1.9.9.68.1.2.2.1.2 -OQ -Os >> ${TmpDir}${node}_${name}_vmVlan_temp.csv; returncode=$?
     	#echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os"
     else
         #snmptable to get Vlan Table
-        snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node vmVlan -OQ -Os >> ${TmpDir}${name}_vmVlan_temp.csv; returncode=$?
+        snmpwalk -r 2 -t $timeout -v 2c -c $snmpcom $node 1.3.6.1.4.1.9.9.68.1.2.2.1.2 -OQ -Os >> ${TmpDir}${node}_${name}_vmVlan_temp.csv; returncode=$?
     fi
 
     if [ $returncode -ne 0 ];then
        return 1
     else
         #Cut in all . and keep the 2nd part
-        cut -d . -f 2 ${TmpDir}${name}_vmVlan_temp.csv > ${loc}${name}_vmVlan.csv
+        cut -d . -f 2 ${TmpDir}${node}_${name}_vmVlan_temp.csv > ${loc}${node}_${name}_vmVlan.csv
         #Open the CSV file and replace " = " by "," for Splunk
-        sed -i 's/ = /,/g'  ${loc}${name}_vmVlan.csv
+        sed -i 's/ = /,/g'  ${loc}${node}_${name}_vmVlan.csv
     fi
     #Remove the temporary file
-    rm ${TmpDir}${name}_vmVlan_temp.csv
+    rm ${TmpDir}${node}_${name}_vmVlan_temp.csv
 }
 
 function vtpVlanTable
@@ -144,22 +144,22 @@ function vtpVlanTable
     #Check if we ask a timeout
     if [ -z $timeout ];then
         #snmptable to get VTP
-        snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable > ${TmpDir}${name}_vtpVlanTable_temp.csv; returncode=$?
+        snmptable -v 2c -c $snmpcom $node -Cb -Ci -Cf , 1.3.6.1.4.1.9.9.46.1.3.1 > ${TmpDir}${node}_${name}_vtpVlanTable_temp.csv; returncode=$?
     	#echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable"
     else
         #snmptable to get VTP
-        snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Ci -Cf , vtpVlanTable > ${TmpDir}${name}_vtpVlanTable_temp.csv; returncode=$?
+        snmptable -r 2 -t $timeout -v 2c -c $snmpcom $node -Cb -Ci -Cf , 1.3.6.1.4.1.9.9.46.1.3.1 > ${TmpDir}${node}_${name}_vtpVlanTable_temp.csv; returncode=$?
     fi
 
     if [ $returncode -ne 0 ];then
        return 1
     else
         #Cut in all . and keep the 2nd part | Delete the 3 first lines
-        cut -d . -f 2 ${TmpDir}${name}_vtpVlanTable_temp.csv | tail -n +3 > ${loc}${name}_vtpVlanTable.csv
+        cut -d . -f 2 ${TmpDir}${node}_${name}_vtpVlanTable_temp.csv | tail -n +3 > ${loc}${node}_${name}_vtpVlanTable.csv
         #Open the CSV file and replace the header index by IfIndexVTP for Splunk
-        sed -i 's/index/IfIndexVTP/g' ${loc}${name}_vtpVlanTable.csv
+        sed -i 's/index/IfIndexVTP/g' ${loc}${node}_${name}_vtpVlanTable.csv
         #Remove the temporary file
-        rm ${TmpDir}${name}_vtpVlanTable_temp.csv
+        rm ${TmpDir}${node}_${name}_vtpVlanTable_temp.csv
     fi
 }
 
@@ -169,29 +169,29 @@ function ifAlias
     node=$1; name=$2; snmpcom=$3; timeout=$4
 
     #We don't use the snmp table so we have to inject the header manually
-    printf "IfIndex = Alias\r\n" > ${TmpDir}${name}_ifAlias_temp.csv
-    printf "IfIndex = Alias\r\n" > ${loc}${name}_ifAlias.csv
+    printf "IfIndex = Alias\r\n" > ${TmpDir}${node}_${name}_ifAlias_temp.csv
+    printf "IfIndex = Alias\r\n" > ${loc}${node}_${name}_ifAlias.csv
 
     #Check if we ask a timeout
     if [ -z $timeout ];then
         #snmptable to get Vlan Table
-        snmpwalk -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os >> ${TmpDir}${name}_ifAlias_temp.csv; returncode=$?
+        snmpwalk -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os >> ${TmpDir}${node}_${name}_ifAlias_temp.csv; returncode=$?
     	#echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os"
     else
         #snmptable to get Vlan Table
-        snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os >> ${TmpDir}${name}_ifAlias_temp.csv; returncode=$?
+        snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node  ifAlias -OQ -Os >> ${TmpDir}${node}_${name}_ifAlias_temp.csv; returncode=$?
     fi
 
     if [ $returncode -ne 0 ];then
         return 1
     else
         #Cut in all . and keep the 2nd part
-        cut -d . -f 2 ${TmpDir}${name}_ifAlias_temp.csv > ${loc}${name}_ifAlias.csv
+        cut -d . -f 2 ${TmpDir}${node}_${name}_ifAlias_temp.csv > ${loc}${node}_${name}_ifAlias.csv
         #Open the CSV file and replace all " = " by "," for Splunk
-        sed -i 's/ = /,/g' ${loc}${name}_ifAlias.csv
+        sed -i 's/ = /,/g' ${loc}${node}_${name}_ifAlias.csv
     fi
     #Delete the temporary file
-    rm ${TmpDir}${name}_ifAlias_temp.csv
+    rm ${TmpDir}${node}_${name}_ifAlias_temp.csv
 }
 
 function dot1dBasePortTable
@@ -211,11 +211,11 @@ function dot1dBasePortTable
 
     if [ $returncode -eq 0 ]; then
         #Check if we ask a timeout
-    printf "Port,IfIndex,dot1dBasePortCircuit,dot1dBasePortDelayExceededDiscards,dot1dBasePortMtuExceededDiscards\r\n" > ${TmpDir}${name}_dot1dBasePortTable_temp.csv
+    printf "Port,IfIndex,dot1dBasePortCircuit,dot1dBasePortDelayExceededDiscards,dot1dBasePortMtuExceededDiscards\r\n" > ${TmpDir}${node}_${name}_dot1dBasePortTable_temp.csv
         if [ -z $timeout ];then
-            snmptable -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dBasePortTable >> ${TmpDir}${name}_dot1dBasePortTable_temp.csv; return=$?
+            snmptable -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dBasePortTable >> ${TmpDir}${node}_${name}_dot1dBasePortTable_temp.csv; return=$?
         else
-            snmptable -r 1 -t $timeout -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dBasePortTable >> ${TmpDir}${name}_dot1dBasePortTable_temp.csv; return=$?
+            snmptable -r 1 -t $timeout -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dBasePortTable >> ${TmpDir}${node}_${name}_dot1dBasePortTable_temp.csv; return=$?
         fi
 
         if [ $return -eq 0 ];then
@@ -226,16 +226,16 @@ function dot1dBasePortTable
                     #Check if we ask a timeout
                     if [ -z $timeout ];then
                         #snmptable to get generic information for the vlan | Delete the 3 first lines and inject the result at the end of the CSV
-                        snmptable -v 2c -m +ALL -c $snmpcom@$line $node -CH -Cf , dot1dBasePortTable >> ${TmpDir}${name}_dot1dBasePortTable_temp.csv
+                        snmptable -v 2c -m +ALL -c $snmpcom@$line $node -CH -Cf , dot1dBasePortTable >> ${TmpDir}${node}_${name}_dot1dBasePortTable_temp.csv
                     else
                         #snmptable to get generic information for the vlan | Delete the 3 first lines and inject the result at the end of the CSV
-                        snmptable -r 1 -t $timeout -v 2c -m +ALL -c $snmpcom@$line $node -CH -Cf , dot1dBasePortTable >> ${TmpDir}${name}_dot1dBasePortTable_temp.csv
+                        snmptable -r 1 -t $timeout -v 2c -m +ALL -c $snmpcom@$line $node -CH -Cf , dot1dBasePortTable >> ${TmpDir}${node}_${name}_dot1dBasePortTable_temp.csv
                     fi
                 fi
             done
             #Copie to the final CSV
-            cat ${TmpDir}${name}_dot1dBasePortTable_temp.csv >> ${loc}${name}_dot1dBasePortTable.csv
-            rm ${TmpDir}${name}_dot1dBasePortTable_temp.csv
+            cat ${TmpDir}${node}_${name}_dot1dBasePortTable_temp.csv >> ${loc}${node}_${name}_dot1dBasePortTable.csv
+            rm ${TmpDir}${node}_${name}_dot1dBasePortTable_temp.csv
         fi
     else
         return 1
@@ -258,12 +258,12 @@ function dot1dTpFdbTable
     fi
 
     if [ $returncode -eq 0 ];then
-    printf "Address,Port,Status\r\n" > ${TmpDir}${name}_dot1dTpFdbTable_temp.csv
+    printf "Address,Port,Status\r\n" > ${TmpDir}${node}_${name}_dot1dTpFdbTable_temp.csv
      
     	if [ -z $timeout ];then
-            snmptable -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${name}_dot1dTpFdbTable_temp.csv; return=$?
+            snmptable -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${node}_${name}_dot1dTpFdbTable_temp.csv; return=$?
         else
-            snmptable -r 1 -t $timeout -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${name}_dot1dTpFdbTable_temp.csv; return=$?
+            snmptable -r 1 -t $timeout -v 2c -m +ALL -c $snmpcom@1 $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${node}_${name}_dot1dTpFdbTable_temp.csv; return=$?
         fi
 
         if [ $return -eq 0 ];then
@@ -274,17 +274,16 @@ function dot1dTpFdbTable
                 #Check if we ask a timeout
                 if [ -z $timeout ];then
                     #snmptable to get mac address learned for the vlan | Delete the 3 first lines and inject the result at the end of the CSV
-                    snmptable -O0sUX -v 2c -m +ALL -c $snmpcom@$line $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${name}_dot1dTpFdbTable_temp.csv
+                    snmptable -O0sUX -v 2c -m +ALL -c $snmpcom@$line $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${node}_${name}_dot1dTpFdbTable_temp.csv
                 else
                     #snmptable to get mac address learned for the vlan | Delete the 3 first lines and inject the result at the end of the CSV
-                    snmptable -r 1 -t $timeout -O0sUX -v 2c -m +ALL -c $snmpcom@$line $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${name}_dot1dTpFdbTable_temp.csv
+                    snmptable -r 1 -t $timeout -O0sUX -v 2c -m +ALL -c $snmpcom@$line $node -CH -Cf , dot1dTpFdbTable >> ${TmpDir}${node}_${name}_dot1dTpFdbTable_temp.csv
                 fi
             fi
         done
-
            #Copie to the final CSV
-           cat ${TmpDir}${name}_dot1dTpFdbTable_temp.csv >> ${loc}${name}_dot1dTpFdbTable.csv
-           rm ${TmpDir}${name}_dot1dTpFdbTable_temp.csv
+           cat ${TmpDir}${node}_${name}_dot1dTpFdbTable_temp.csv >> ${loc}${node}_${name}_dot1dTpFdbTable.csv
+           rm ${TmpDir}${node}_${name}_dot1dTpFdbTable_temp.csv
     fi
     else
         return 1
@@ -296,28 +295,28 @@ function vlanTrunkPortDynamicStatus
     #Get the first & second argument & third if exist
     node=$1; name=$2; snmpcom=$3; timeout=$4
     #We don't use the snmp table so we have to inject the header manually
-    printf "IfIndex = Trunk\r\n" > ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv
-    printf "IfIndex = Trunk\r\n" > ${loc}${name}_vlanTrunkPortDynamicStatus.csv
+    printf "IfIndex = Trunk\r\n" > ${TmpDir}${node}_${name}_vlanTrunkPortDynamicStatus_temp.csv
+    printf "IfIndex = Trunk\r\n" > ${loc}${node}_${name}_vlanTrunkPortDynamicStatus.csv
     #Check if we ask a timeout
     if [ -z $timeout ];then
         #snmptable to get Vlan Table
-        snmpwalk -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os >> ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv; returncode=$?
+        snmpwalk -v 2c -c $snmpcom $node 1.3.6.1.4.1.9.9.46.1.6.1.1.14  -OQ -Os >> ${TmpDir}${node}_${name}_vlanTrunkPortDynamicStatus_temp.csv; returncode=$?
     	#echo "snmpwalk -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os"
     else
         #snmptable to get Vlan Table
-        snmpwalk -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node vlanTrunkPortDynamicStatus  -OQ -Os >> ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv; returncode=$?
+        snmpwalk -r 2 -t $timeout -v 2c -c $snmpcom $node 1.3.6.1.4.1.9.9.46.1.6.1.1.14  -OQ -Os >> ${TmpDir}${node}_${name}_vlanTrunkPortDynamicStatus_temp.csv; returncode=$?
     fi
 
     if [ $returncode -ne 0 ];then
        return 1
     else
         #Cut in all . and keep the 2nd part
-        cut -d . -f 2 ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv > ${loc}${name}_vlanTrunkPortDynamicStatus.csv
+        cut -d . -f 2 ${TmpDir}${node}_${name}_vlanTrunkPortDynamicStatus_temp.csv > ${loc}${node}_${name}_vlanTrunkPortDynamicStatus.csv
         #Open the CSV file and replace " = " by "," for Splunk
-        sed -i 's/ = /,/g'  ${loc}${name}_vlanTrunkPortDynamicStatus.csv
+        sed -i 's/ = /,/g'  ${loc}${node}_${name}_vlanTrunkPortDynamicStatus.csv
     fi
     #Remove the temporary file
-    rm ${TmpDir}${name}_vlanTrunkPortDynamicStatus_temp.csv
+    rm ${TmpDir}${node}_${name}_vlanTrunkPortDynamicStatus_temp.csv
 }
 
 
@@ -347,6 +346,10 @@ function GetSNMP
         ipAddrTable $node $name $snmpcom
         #Call ifAlias function with the IP and the name
         ifAlias $node $name $snmpcom
+        #Call ifAlias function with the IP and the name
+        vmVlan $node $name $snmpcom
+        #Call ifAlias function with the IP and the name
+        vtpVlanTable $node $name $snmpcom
         #Call dot1dBasePortTable function with the IP and the name
         dot1dBasePortTable $node $name $snmpcom
         #Call dot1dTpFdbTable function with the IP and the name
@@ -375,21 +378,21 @@ function EmptyCSV {
     fi
 
     # Files to check
-    fileifTable=${loc}${name}_ifTable.csv
-    fileipAddrTable=${loc}${name}_ipAddrTable.csv
-    #filevmVlan=${loc}${name}_vmVlan.csv
-    #filevtpVlanTable=${loc}${name}_vtpVlanTable.csv
-    fileifAlias=${loc}${name}_ifAlias.csv
-    filedot1dBasePortTable=${loc}${name}_dot1dBasePortTable.csv
-    filedot1dTpFdbTable=${loc}${name}_dot1dTpFdbTable.csv
-    filevlanTrunkPortDynamicStatus=${loc}${name}_vlanTrunkPortDynamicStatus.csv
+    fileifTable=${loc}${node}_${name}_ifTable.csv
+    fileipAddrTable=${loc}${node}_${name}_ipAddrTable.csv
+    filevmVlan=${loc}${node}_${name}_vmVlan.csv
+    filevtpVlanTable=${loc}${node}_${name}_vtpVlanTable.csv
+    fileifAlias=${loc}${node}_${name}_ifAlias.csv
+    filedot1dBasePortTable=${loc}${node}_${name}_dot1dBasePortTable.csv
+    filedot1dTpFdbTable=${loc}${node}_${name}_dot1dTpFdbTable.csv
+    filevlanTrunkPortDynamicStatus=${loc}${node}_${name}_vlanTrunkPortDynamicStatus.csv
 
     #Minimum size required
     minimumsize=3
 
     if [ -f $fileifTable ];then
         #Calcul the size of all files
-        ifTable=$( stat -c %s ${loc}${name}_ifTable.csv)
+        ifTable=$( stat -c %s ${loc}${node}_${name}_ifTable.csv)
         #Chech the size for IfTable of the node to know if it empty
         if [ $minimumsize -ge $ifTable ]; then
             echo "IfTable is empty for "$name".Size : " $ifTable >> ${SnmpEmpty}
@@ -399,7 +402,7 @@ function EmptyCSV {
 
     if [ -f $fileipAddrTable ];then
         #Calcul the size of all files
-        ipAddrTable=$( stat -c %s ${loc}${name}_ipAddrTable.csv)
+        ipAddrTable=$( stat -c %s ${loc}${node}_${name}_ipAddrTable.csv)
         #Chech the size for ipAddrTable of the node to know if it empty
         if [ $minimumsize -ge $ipAddrTable ]; then
             echo "ipAddrTable is empty for "$name".Size : " $ipAddrTable >> ${SnmpEmpty}
@@ -407,9 +410,29 @@ function EmptyCSV {
         fi
     fi
 
+    if [ -f $filevmVlan ];then
+        #Calcul the size of all files
+        vmVlan=$( stat -c %s ${loc}${node}_${name}_vmVlan.csv)
+        #Chech the size for vmVlan of the node to know if it empty
+        if [ $minimumsize -ge $vmVlan ]; then
+            echo "vmVlan is empty for "$name".Size : " $vmVlan >> ${SnmpEmpty}
+            rm $filevmVlan
+        fi
+    fi
+
+    if [ -f $filevtpVlanTable ];then
+        #Calcul the size of all files
+        vtpVlanTable=$( stat -c %s ${loc}${node}_${name}_vtpVlanTable.csv)
+        #Chech the size for vtpVlanTable of the node to know if it empty
+        if [ $minimumsize -ge $vtpVlanTable ]; then
+            echo "vtpVlanTable is empty for "$name".Size : " $vtpVlanTable >> ${SnmpEmpty}
+            rm $filevtpVlanTable
+        fi
+    fi
+
     if [ -f $fileifAlias ];then
         #Calcul the size of all files
-        ifAlias=$( stat -c %s ${loc}${name}_ifAlias.csv)
+        ifAlias=$( stat -c %s ${loc}${node}_${name}_ifAlias.csv)
         #Chech the size for ifAlias of the node to know if it empty
         if [ $minimumsize -ge $ifAlias ]; then
             echo "ifAlias is empty for "$name".Size : " $ifAlias >> ${SnmpEmpty}
@@ -417,9 +440,29 @@ function EmptyCSV {
         fi
     fi
     
+    if [ -f $filedot1dBasePortTable ];then
+        #Calcul the size of all files
+        dot1dBasePortTable=$( stat -c %s ${loc}${node}_${name}_dot1dBasePortTable.csv)
+        #Chech the size for dot1dBasePortTable of the node to know if it empty
+        if [ $minimumsize -ge $dot1dBasePortTable ]; then
+            echo "dot1dBasePortTable is empty for "$name".Size : " $dot1dBasePortTable >> ${SnmpEmpty}
+            rm $filedot1dBasePortTable
+        fi
+    fi
+
+    if [ -f $filedot1dTpFdbTable ];then
+        #Calcul the size of all files
+        dot1dTpFdbTable=$( stat -c %s ${loc}${node}_${name}_dot1dTpFdbTable.csv)
+        #Chech the size for dot1dTpFdbTable of the node to know if it empty
+        if [ $minimumsize -ge $dot1dTpFdbTable ]; then
+            echo "dot1dTpFdbTable is empty for "$name".Size : " $dot1dTpFdbTable >> ${SnmpEmpty}
+            rm $filedot1dTpFdbTable
+        fi
+    fi
+
     if [ -f $filevlanTrunkPortDynamicStatus ];then
         #Calcul the size of all files
-        vlanTrunkPortDynamicStatus=$( stat -c %s ${loc}${name}_vlanTrunkPortDynamicStatus.csv)
+        vlanTrunkPortDynamicStatus=$( stat -c %s ${loc}${node}_${name}_vlanTrunkPortDynamicStatus.csv)
         #Chech the size for vlanTrunkPortDynamicStatus of the node to know if it empty
         if [ $minimumsize -ge $vlanTrunkPortDynamicStatus ]; then
             echo "vlanTrunkPortDynamicStatus is empty for "$name".Size : " $vlanTrunkPortDynamicStatus >> ${SnmpEmpty}
@@ -436,6 +479,11 @@ StartDate=$(date -u -d "$start" +"%s")
 echo "~~~~~~~Start : $start~~~~~~ "
 
 curl 127.0.0.1:5000/api/devices | jq . > $file
+
+if [ $? -nq 0 ];then
+    echo "Unable to get equipment List - Warning High" >> ${ErrEquip}
+fi
+
 size="$(jq length $file)"
 for (( i=0; i < $size; i++ ))
 do
