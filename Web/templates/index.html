@@ -3,21 +3,43 @@
 	<head>
 	    <meta charset="UTF-8">
 	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	    <link rel="stylesheet" type="text/css" href="design.css">
 	    <title>Supervision</title>
 	</head>
 	<body>
-	    <h1>Supervisiom</h1>
-	  	<div class="pie">
-	  		<h2>Network Equipment</h2> 
-	   		<div class="piechart"></div>
-	   	</div>
-	   	<div class="node">
-	   		<ul>
-	  			<li><a href="URL of node page avec en argument son IP">value1</a></li>
-	  			<li><a href="URL of node page avec en argument son IP">value2</a></li>
-	  			<li><a href="URL of node page avec en argument son IP">value2</a></li>
-			</ul>
-	   	</div>
+		<table>
+			<th>
+				<table border="1">
+					<tr>
+						<th>IP</th>
+						<th>Community</th>
+						<th>type</th>
+						<th>Status</th>
+					</tr>
+					{% for device in device_list%}
+					<tr>
+						<th><a href="monitor/{{device.ip}}">{{device.ip}}</a></th>
+						<th>{{device.community}}</th>
+						<th>{{device.type}}</th>
+						<th>?</th>
+					</tr>
+					{% endfor %}
+				</table>
+			</th><th>
+				<table border="1">
+					<tr>
+						<th>logType</th>
+						<th>logData</th>
+						<th>logIP</th>
+					</tr>
+					{% for log in logs%}
+					<tr>
+						<th>{{log.logType}}</th>
+						<th>{{log.logData}}</th>
+						<th><a href="monitor/{{log.logIP}}">{{log.logIP}}</a></th>
+					</tr>
+					{% endfor %}
+				</table>
+			</th>
+		</table>
 	</body>
 </html>
