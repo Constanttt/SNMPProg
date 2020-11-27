@@ -135,9 +135,5 @@ api.add_resource(SNMPData_deviceType, '/api/database/snmpdata/deviceType/<value>
 api.add_resource(DeviceList, '/api/devices') #get=list post=create
 api.add_resource(Device, '/api/devices/<device_ip>') #put/patch update delete=remove
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 if __name__ == '__main__':
     app.run(debug=True, host= '0.0.0.0')
