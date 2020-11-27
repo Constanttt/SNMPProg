@@ -1,12 +1,12 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_restful import reqparse, abort, Resource, Api
 import json
 
 from flask import Flask, render_template, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
-from connectBDD import *
-from Conf_Reader import Conf_Reader
+from lib.connectBDD import *
+from lib.Conf_Reader import Conf_Reader
 
 app = Flask(__name__)
 api = Api(app)
@@ -134,6 +134,10 @@ api.add_resource(SNMPData_deviceType, '/api/database/snmpdata/deviceType/<value>
 
 api.add_resource(DeviceList, '/api/devices') #get=list post=create
 api.add_resource(Device, '/api/devices/<device_ip>') #put/patch update delete=remove
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

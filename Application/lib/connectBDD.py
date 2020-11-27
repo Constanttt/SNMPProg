@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import json
 
-from initBDD import SNMPData, Logs
+from lib.initBDD import SNMPData, Logs
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bdd.db'
