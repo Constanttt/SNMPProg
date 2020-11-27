@@ -90,6 +90,11 @@ class SNMPData_deviceType(Resource):
         data = get_snmpdata_by_deviceType(value)
         return data
 
+class SNMPData_nameip(Resource):
+    def get(self, name, ip):
+        data = get_snmpdata_by_name_and_ip(name, ip)
+        return data
+
 class DeviceList(Resource):
     def get(self):
         cf = Conf_Reader()
@@ -131,6 +136,7 @@ api.add_resource(SNMPData_all, '/api/database/snmpdata/all') #post, get
 api.add_resource(SNMPData_ip, '/api/database/snmpdata/ip/<value>') #get
 api.add_resource(SNMPData_name, '/api/database/snmpdata/name/<value>') #get
 api.add_resource(SNMPData_deviceType, '/api/database/snmpdata/deviceType/<value>') #get
+api.add_resource(SNMPData_nameip, '/api/database/snmpdata/nameip/<name>/<ip>') #get
 
 api.add_resource(DeviceList, '/api/devices') #get=list post=create
 api.add_resource(Device, '/api/devices/<device_ip>') #put/patch update delete=remove

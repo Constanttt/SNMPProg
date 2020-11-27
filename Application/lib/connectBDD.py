@@ -109,6 +109,21 @@ def get_snmpdata_by_deviceType(device_type):
         })
     return arr
 
+def get_snmpdata_by_name_and_ip(name, ip):
+    comma_list = SNMPData.query.filter_by(name=name, ip=ip).limit(50).all()
+    arr = []
+    for elem in comma_list:
+        temp = str(elem).split(',')
+        arr.append({
+            "id":temp[0],
+            "ip":temp[1],
+            "name":temp[2],
+            "deviceType":temp[3],
+            "data":temp[4],
+            "timestamp":temp[5]
+        })
+    return arr
+
 def add_log(logType, logData, logIP):
     log = Logs(logType=logType, logData=logData, logIP=logIP)
     db.session.add(log)
