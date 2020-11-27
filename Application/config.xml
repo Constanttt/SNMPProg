@@ -1,10 +1,10 @@
 <configuration>
     <switch>
-            <device ip="192.168.1.54" community="snmpcom" />
+            <device ip="192.168.1.54" version="3" username="auth" password="snmpcomv3" protocol="SHA" protocolprivacy="AES" passwordprivacy="snmpcomv3" />
     </switch>
     <router>
     </router>
     <pc>
-	    <device ip="192.168.1.2" community="public"/>
+	    <device ip="192.168.1.2" community="public" version="2"/>
     </pc>
 </configuration>
