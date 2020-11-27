@@ -2,88 +2,16 @@ import os
 import csv
 import re
 import time
+import requests
+import json
+from datetime import datetime
 from os.path import getsize
 
-def ifTable(file):
-    print(file)
-    with open(file) as csvDataFile:
-        print("ifTable")
-        csvReader = csv.reader(csvDataFile)
-        for row in csvReader:
-            print(row)
-        time.sleep(.300)
-        os.remove(file)
-        
+DB="http://192.168.1.2:5000"
+header = {"Content-Type": "application/json"}
 
-def ipAddrTable(file):
-    print(file)
-    with open(file) as csvDataFile:
-        print("ipAddrTable")
-        csvReader = csv.reader(csvDataFile)
-        for row in csvReader:
-            print(row)
-        time.sleep(.300)
-        os.remove(file)
-
-def vtpVlanTable(file):
-    print(file)
-    with open(file) as csvDataFile:
-        print("vtpVlanTable")
-        csvReader = csv.reader(csvDataFile)
-        for row in csvReader:
-            print(row)
-        time.sleep(.300)
-        os.remove(file)
-
-def vmVlan(file):
-    print(file)
-    with open(file) as csvDataFile:
-        print("vmVlan")
-        csvReader = csv.reader(csvDataFile)
-        for row in csvReader:
-            print(row)
-        time.sleep(.300)
-        os.remove(file)
-
-def ifAlias(file):
-    print(file)
-    with open(file) as csvDataFile:
-        print("ifAlias")
-        csvReader = csv.reader(csvDataFile)
-        for row in csvReader:
-            print(row)
-        time.sleep(.300)
-        os.remove(file)
-
-def dot1dBasePortTable(file):
-    print(file)
-    with open(file) as csvDataFile:
-        print("dot1dBasePortTable")
-        csvReader = csv.reader(csvDataFile)
-        for row in csvReader:
-            print(row)
-        time.sleep(.300)
-        os.remove(file)
-
-def dot1dTpFdbTable(file):
-    print(file)
-    with open(file) as csvDataFile:
-        print("dot1dTpFdbTable")
-        csvReader = csv.reader(csvDataFile)
-        for row in csvReader:
-            print(row)
-        time.sleep(.300)
-        os.remove(file)
-
-def vlanTrunkPortDynamicStatus(file):
-    print(file)
-    with open(file) as csvDataFile:
-        print("vlanTrunkPortDynamicStatus")
-        csvReader = csv.reader(csvDataFile)
-        for row in csvReader:
-            print(row)
-        time.sleep(.300)
-        os.remove(file)
+response = requests.get(DB+'/api/devices')
+equipment = json.loads(response.text) 
 
 def main():
     os.chdir("/tmp/snmptemp/csv/")
@@ -99,23 +27,43 @@ def main():
 
         #words = ['ifTable','ipAddrTable','vmVlan','vtpVlanTable','ifAlias','dot1dBasePortTable','dot1dTpFdbTable','vlanTrunkPortDynamicStatus']
         if re.match('.*ifTable.*', file):
-            ifTable(file)
+            oid="ifTable"
         elif re.match('.*ipAddrTable.*', file):
-            ipAddrTable(file)
+            oid="ipAddrTable"
         elif re.match('.*vmVlan.*', file):
-            vmVlan(file)
+            oid="vmVlan"
         elif re.match('.*vtpVlanTable.*', file):
-            vtpVlanTable(file)
+            oid="vtpVlanTable"
         elif re.match('.*ifAlias.*', file):
-            ifAlias(file)
+            oid="ifAlias"
         elif re.match('.*dot1dBasePortTable.*', file):
-            dot1dBasePortTable(file)
+            oid="dot1dBasePortTable"
         elif re.match('.*dot1dTpFdbTable.*', file):
-            dot1dTpFdbTable(file)
+            oid="dot1dTpFdbTable"
         elif re.match('.*vlanTrunkPortDynamicStatus.*', file):
-            vlanTrunkPortDynamicStatus(file)
+            oid="vlanTrunkPortDynamicStatus"
         else:
             print("Name of the file incorrect")
+
+        print(file)
+
+        IP = file.split("_")[0]
+        for device in equipment:
+            if device["ip"] == IP:
+                type= device["type"]
+
+        with open(file) as csvDataFile:
+            print(oid)
+            #response = requests.get('http://192.168.1.2:5000/api/devices')
+            csvReader = csv.reader(csvDataFile)
+            next(csvReader)
+            for row in csvReader:
+                dateTimeObj = datetime.now()
+                liste = "_".join(row)
+                payload = {'ip':IP, 'name': oid, 'deviceType':type, 'data':liste, 'timestamp':dateTimeObj}
+                r = requests.post(DB+"/api/database/snmpdata/all", data=payload)
+            time.sleep(.300)
+            os.remove(file)
 
 if __name__ == "__main__":
     main()
