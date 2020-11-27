@@ -99,7 +99,7 @@ A ce jour le collecteur est fini. Dans une optique d'amélioration, nous voudrio
 L'idée serait d'envoyer les informations sous forme de ´PUT´ sous la forme :
 "@IP de l'équipement"_"Element monitoré"_"valeur1"_"valeur2"_.....
 
-![Collecteur](doc/Collecteur.png)
+![Usecase](doc/Collecteur.png)
 
 #### Module de traitement des données
 
