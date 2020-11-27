@@ -16,6 +16,9 @@ loc="/tmp/snmptemp/csv/"
 #SNMP Community for test
 #snmpcom="snmpcom"
 
+#DB
+DB="192.168.1.2:5000"
+
 #Set invalid VLAN
 invalidvlans="100[2-5]"
 
@@ -30,6 +33,11 @@ ErrEquip=${loc}snmp_errors.err
 
 #Set error file for emptyCSV to analyse
 SnmpEmpty=${loc}snmp_empty.err
+
+#If the folder of all CSV file doesn't exist create it
+if [ ! -d ${loc} ]; then
+        mkdir -p $loc
+fi
 
 #If the folder of all CSV file doesn't exist create it
 if [ ! -d ${TmpDir} ]; then
@@ -56,27 +64,39 @@ fi
 function ifTable
 {
     #Get the first & second argument & third if exist
-    node=$1; name=$2; snmpcom=$3; timeout=$4
+    node=$1; name=$2; version=$3
 
-    #Check if we ask a timeout
-    if [ -z $timeout ];then
-        #snmptable to get the show interface
-        snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${node}_${name}_ifTable_temp.csv; returncode=$?
-        #echo "snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable"
+    #Depend of the version bring different informations
+    if [ $version -eq 2 ];then
+        snmpcom=$4; timeout=$5
+
+        #Check if we ask a timeout
+        if [ -z $timeout ];then
+            #snmptable to get the show interface
+            snmptable -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${node}_${name}_ifTable_temp.csv; returncode=$?
+            wait 10
+        else
+            #snmptable to get the show interface
+            snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${node}_${name}_ifTable_temp.csv; returncode=$?
+        fi
     else
+        username=$4; protocol=$5; password=$6; protocolprivacy=$7; passwordprivacy=$8
+
         #snmptable to get the show interface
-        snmptable -r 2 -t $timeout -v 2c -m +ALL -c $snmpcom $node -Cb -Cf , ifTable > ${TmpDir}${node}_${name}_ifTable_temp.csv; returncode=$?
+        snmptable -v 3 -u $username -a $protocol -A $password -x $protocolprivacy -X $passwordprivacy -l authPriv $node -Cb -Cf , ifTable > ${TmpDir}${node}_${name}_ifTable_temp.csv; returncode=$?
+        wait 10
     fi
 
     if [ $returncode -ne 0 ];then
-       return 1
-    else
-        #Delete the three first lines
-        tail -n +3 ${TmpDir}${node}_${name}_ifTable_temp.csv > ${loc}${node}_${name}_ifTable.csv
-        #Open the CSV file and replace Index by IfIndex for Splunk
-        sed -i 's/Index/IfIndex/g' ${loc}${node}_${name}_ifTable.csv
-        #Remove the temporary file
-        rm ${TmpDir}${node}_${name}_ifTable_temp.csv
+            curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"SNMP IfTable failed for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
+           return 1
+        else
+            #Delete the three first lines
+            tail -n +3 ${TmpDir}${node}_${name}_ifTable_temp.csv > ${loc}${node}_${name}_ifTable.csv
+            #Open the CSV file and replace Index by IfIndex for Splunk
+            sed -i 's/Index/IfIndex/g' ${loc}${node}_${name}_ifTable.csv
+            #Remove the temporary file
+            rm ${TmpDir}${node}_${name}_ifTable_temp.csv
     fi
 }
 
@@ -96,6 +116,7 @@ function ipAddrTable
     fi
 
     if [ $returncode -ne 0 ];then
+        curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"SNMP ipAddrTable failed for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
        return 1
     else
         #Delete the three first lines
@@ -125,6 +146,7 @@ function vmVlan
     fi
 
     if [ $returncode -ne 0 ];then
+        curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"SNMP vmVlan failed for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
        return 1
     else
         #Cut in all . and keep the 2nd part
@@ -152,6 +174,7 @@ function vtpVlanTable
     fi
 
     if [ $returncode -ne 0 ];then
+        curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"SNMP vtpVlanTable failed for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
        return 1
     else
         #Cut in all . and keep the 2nd part | Delete the 3 first lines
@@ -183,6 +206,7 @@ function ifAlias
     fi
 
     if [ $returncode -ne 0 ];then
+        curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"SNMP ifAlias failed for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
         return 1
     else
         #Cut in all . and keep the 2nd part
@@ -238,6 +262,7 @@ function dot1dBasePortTable
             rm ${TmpDir}${node}_${name}_dot1dBasePortTable_temp.csv
         fi
     else
+        curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"SNMP dot1dBasePortTable failed for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
         return 1
     fi
 }
@@ -286,6 +311,7 @@ function dot1dTpFdbTable
            rm ${TmpDir}${node}_${name}_dot1dTpFdbTable_temp.csv
     fi
     else
+        curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"SNMP dot1dTpFdbTable failed for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
         return 1
     fi
 }
@@ -308,6 +334,7 @@ function vlanTrunkPortDynamicStatus
     fi
 
     if [ $returncode -ne 0 ];then
+        curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"SNMP vlanTrunkPortDynamicStatus failed for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
        return 1
     else
         #Cut in all . and keep the 2nd part
@@ -323,25 +350,26 @@ function vlanTrunkPortDynamicStatus
 #Function GetSNMP to parse SNMP Values
 function GetSNMP
 {
-    #Get the first argument
-    node=$1; snmpcom=$2
+    #Get arguments
+    node=$1;  version=$2
 
-    #Get equipments name & Get returncode for snmp name equipment request
-    name="$(snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0)"
-    
-    if [ -z $name ];then
+    #Depend of the version bring different informations
+    if [ $version -eq 2 ];then
+        snmpcom=$3; 
+
         #Get equipments name & Get returncode for snmp name equipment request
-        name="$(snmpget -r 2 -t 60 -v 2c -m +ALL -Ov -Oq -c $; name=$2; $node sysName.0)"
+        name="$(snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0)"
+    
         if [ -z $name ];then
-            name=$node
+            #Get equipments name & Get returncode for snmp name equipment request
+            name="$(snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0)"
+            if [ -z $name ];then
+                name=$node
+            fi
         fi
-    fi
 
-    #Get exit status of the last command - if no error during last command execution
-    if [ $? -eq 0 ]
-    then
         #Call ifTable function with the IP and the name
-        ifTable $node $name $snmpcom
+        ifTable $node $name $version $snmpcom
         #Call ipAddrTable function with the IP and the name
         ipAddrTable $node $name $snmpcom
         #Call ifAlias function with the IP and the name
@@ -357,14 +385,28 @@ function GetSNMP
         #Call vlanTrunkPortDynamicStatus function with the IP and the name
         vlanTrunkPortDynamicStatus $node $name $snmpcom
     else
-        printf "$node --> KO \r\n"
+        username=$3; protocol=$4; password=$5; protocolprivacy=$6; passwordprivacy=$7
+
+        #Get equipments name & Get returncode for snmp name equipment request
+        name="$(snmpget -r 1 -t 20 -v 3 -u $username -a $protocol -A $password -x $protocolprivacy -X $passwordprivacy -l authPriv -Ov -Oq $node sysName.0)"
+        
+        if [ -z $name ];then
+            #Get equipments name & Get returncode for snmp name equipment request
+            name="$(snmpget -r 1 -t 20 -v 3 -u $username -a $protocol -A $password -x $protocolprivacy -X $passwordprivacy -l authPriv -Ov -Oq $node sysName.0)"
+            if [ -z $name ];then
+                name=$node
+            fi
+        fi
+
+         #Call ifTable function with the IP and the name
+        ifTable $node $name $version $username $protocol $password $protocolprivacy $passwordprivacy
     fi
 }
 
 function EmptyCSV {
 
     #Get the first argument
-    node=$1; snmpcom=$2;
+    node=$1; version=$2; snmpcom=$3
 
     #Get equipments name & Get returncode for snmp name equipment request
     name="$(snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0)"
@@ -396,6 +438,7 @@ function EmptyCSV {
         #Chech the size for IfTable of the node to know if it empty
         if [ $minimumsize -ge $ifTable ]; then
             echo "IfTable is empty for "$name".Size : " $ifTable >> ${SnmpEmpty}
+            curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"IfTable is empty for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
             rm $fileifTable
         fi
     fi
@@ -405,6 +448,7 @@ function EmptyCSV {
         ipAddrTable=$( stat -c %s ${loc}${node}_${name}_ipAddrTable.csv)
         #Chech the size for ipAddrTable of the node to know if it empty
         if [ $minimumsize -ge $ipAddrTable ]; then
+            curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"ipAddrTable is empty for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
             echo "ipAddrTable is empty for "$name".Size : " $ipAddrTable >> ${SnmpEmpty}
             rm $fileipAddrTable
         fi
@@ -415,6 +459,7 @@ function EmptyCSV {
         vmVlan=$( stat -c %s ${loc}${node}_${name}_vmVlan.csv)
         #Chech the size for vmVlan of the node to know if it empty
         if [ $minimumsize -ge $vmVlan ]; then
+            curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"vmVlan is empty for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
             echo "vmVlan is empty for "$name".Size : " $vmVlan >> ${SnmpEmpty}
             rm $filevmVlan
         fi
@@ -425,6 +470,7 @@ function EmptyCSV {
         vtpVlanTable=$( stat -c %s ${loc}${node}_${name}_vtpVlanTable.csv)
         #Chech the size for vtpVlanTable of the node to know if it empty
         if [ $minimumsize -ge $vtpVlanTable ]; then
+            curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"vtpVlanTable is empty for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
             echo "vtpVlanTable is empty for "$name".Size : " $vtpVlanTable >> ${SnmpEmpty}
             rm $filevtpVlanTable
         fi
@@ -435,6 +481,7 @@ function EmptyCSV {
         ifAlias=$( stat -c %s ${loc}${node}_${name}_ifAlias.csv)
         #Chech the size for ifAlias of the node to know if it empty
         if [ $minimumsize -ge $ifAlias ]; then
+            curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"ifAlias is empty for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
             echo "ifAlias is empty for "$name".Size : " $ifAlias >> ${SnmpEmpty}
             rm $fileifAlias
         fi
@@ -445,6 +492,7 @@ function EmptyCSV {
         dot1dBasePortTable=$( stat -c %s ${loc}${node}_${name}_dot1dBasePortTable.csv)
         #Chech the size for dot1dBasePortTable of the node to know if it empty
         if [ $minimumsize -ge $dot1dBasePortTable ]; then
+            curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"filedot1dBasePortTable is empty for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
             echo "dot1dBasePortTable is empty for "$name".Size : " $dot1dBasePortTable >> ${SnmpEmpty}
             rm $filedot1dBasePortTable
         fi
@@ -455,6 +503,7 @@ function EmptyCSV {
         dot1dTpFdbTable=$( stat -c %s ${loc}${node}_${name}_dot1dTpFdbTable.csv)
         #Chech the size for dot1dTpFdbTable of the node to know if it empty
         if [ $minimumsize -ge $dot1dTpFdbTable ]; then
+            curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"filedot1dTpFdbTable is empty for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
             echo "dot1dTpFdbTable is empty for "$name".Size : " $dot1dTpFdbTable >> ${SnmpEmpty}
             rm $filedot1dTpFdbTable
         fi
@@ -465,6 +514,7 @@ function EmptyCSV {
         vlanTrunkPortDynamicStatus=$( stat -c %s ${loc}${node}_${name}_vlanTrunkPortDynamicStatus.csv)
         #Chech the size for vlanTrunkPortDynamicStatus of the node to know if it empty
         if [ $minimumsize -ge $vlanTrunkPortDynamicStatus ]; then
+            curl -X POST -H "Content-Type: application/json" -d '{"logType":"Error","logData":"vlanTrunkPortDynamicStatus is empty for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
             echo "vlanTrunkPortDynamicStatus is empty for "$name".Size : " $vlanTrunkPortDynamicStatus >> ${SnmpEmpty}
             rm $filevlanTrunkPortDynamicStatus
         fi
@@ -478,9 +528,10 @@ StartDate=$(date -u -d "$start" +"%s")
 #Debug
 echo "~~~~~~~Start : $start~~~~~~ "
 
-curl 127.0.0.1:5000/api/devices | jq . > $file
+curl $DB/api/devices | jq . > $file
 
-if [ $? -nq 0 ];then
+if [ $? -ne 0 ];then
+    curl -X POST -H "Content-Type: application/json" -d '{"logType":"Critical","logData":"Unable to get equipment List","logIP":"0.0.0.0"}' $DB/api/database/logs/all
     echo "Unable to get equipment List - Warning High" >> ${ErrEquip}
 fi
 
@@ -489,50 +540,74 @@ for (( i=0; i < $size; i++ ))
 do
     echo "\n\r~~~~~~~Start i=$i~~~~~~"
     node="$(jq -r ".[$i].ip" data.json)"
-    snmpcom="$(jq -r ".[$i].community" data.json)"
+    version="$(jq -r ".[$i].version" data.json)"
     echo "node : $node"
-    echo "community : $snmpcom"
-    #Ping and snmp request
-    ping $node -c 1 -w 1 &> /dev/null && snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0 &> /dev/null
-    #Check return code
-    if [ $? -eq 0 ];then
-        #Exec the function GetSNMP with as param the name of the equipment
-        GetSNMP $node $snmpcom &
-        #Get the PID of the function
-        Id[${i}]=$!
-        #Store tehe PID
-        equipment[${Id[${i}]}]=$node
-        # Wait the end of the function
-        wait ${Id[${x}]}
-        #Double check
-        EmptyCSV ${equipment[${Id[${x}]}]} $snmpcom &
-        Id2[${i}]=$!
-	wait ${Id2[${x}]}
-	if [ $? -ne 0 ];then
-                    # get return and store it
-                    echo "SNMP NOK for " ${equipment[${Id[${x}]}]} >> ${ErrEquip}
-                    echo "SNMP NOK for " ${equipment[${Id[${x}]}]}
-        else
-                    # get return
-                    echo "SNMP OK for " ${equipment[${Id[${x}]}]}
-        fi
+    echo "version : $version"
+
+    if [ $version -eq 3 ];then
+        username="$(jq -r ".[$i].username" data.json)"
+        password="$(jq -r ".[$i].password" data.json)"
+        protocol="$(jq -r ".[$i].protocol" data.json)"
+        protocolprivacy="$(jq -r ".[$i].protocolprivacy" data.json)"
+        passwordprivacy="$(jq -r ".[$i].passwordprivacy" data.json)"
+        echo "username : $username"
+        echo "password : $password"
+        echo "protocol : $protocol"
+        echo "protocolprivacy : $protocolprivacy"
+        echo "passwordprivacy : $passwordprivacy"
     else
+        snmpcom="$(jq -r ".[$i].community" data.json)"
+        echo "community : $snmpcom"
+    fi
+    
+    #Ping and snmp request to check connectivity
+    if [ $version -eq 2 ];then
+        ping $node -c 1 -w 1 &> /dev/null && snmpget -r 1 -t 20 -v 2c -m +ALL -Ov -Oq -c $snmpcom $node sysName.0 &> /dev/null; return=$?
+    else
+        ping $node -c 1 -w 1 &> /dev/null && snmpget -r 1 -t 20 -v 3 -u $username -a $protocol -A $password -x $protocolprivacy -X $passwordprivacy -l authPriv -Ov -Oq $node sysName.0 &> /dev/null; return=$?
+    fi
+
+    if [ $return -ne 0 ];then
+        curl -X POST -H "Content-Type: application/json" -d '{"logType":"Notification","logData":"Ping or SNMP no answered for '$node'","logIP":"'$node'"}' $DB/api/database/logs/all
         echo "Ping or SNMP no answered for " $node >> ${ErrEquip}
         echo "Ping or SNMP no answered for " $node
     fi
+
+    #Check return code
+    if [ $? -eq 0 ];then
+
+        #Depend of the version bring different informations
+        if [ $version -eq 2 ];then
+            #Exec the function GetSNMP with as param the name of the equipment
+            GetSNMP $node $version $snmpcom  &
+            #Get the PID of the function
+            Id[${i}]=$!
+            #Store tehe PID
+            equipment[${Id[${i}]}]=$node
+            # Wait the end of the function
+            wait ${Id[${x}]}; returncode=$?
+            #Double check
+            EmptyCSV ${equipment[${Id[${x}]}]} $version $snmpcom &
+        else
+            #Exec the function GetSNMPv3 with as param the name of the equipment
+            GetSNMP $node $version $username $protocol $password $protocolprivacy $passwordprivacy &
+            #Get the PID of the function
+            Id[${i}]=$!
+            #Store tehe PID
+            equipment[${Id[${i}]}]=$node
+            # Wait the end of the function
+            wait ${Id[${x}]}; returncode=$?
+        fi
+    fi
 done
 
-end=$(date +"%T")
-FinalDate=$(date -u -d "$end" +"%s")
-
-duration=$(date -u -d "0 $FinalDate sec - $StartDate sec" +"%H:%M:%S")
-
+end=$(date +"%T"); FinalDate=$(date -u -d "$end" +"%s"); duration=$(date -u -d "0 $FinalDate sec - $StartDate sec" +"%H:%M:%S")
 
 #Check is the error file if exist
 if [ -f $file ]
 then
-        #Clear the error equipment file
-        rm ${file}
+    #Clear the error equipment file
+    rm ${file}
 fi
 
-echo "$FinalDate : END"
+echo "$duration : END"
