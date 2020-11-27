@@ -94,19 +94,20 @@ Le module de configuration est développé en Bash. Il comprend un script qui r�
 
 Ce module demande l'installation de snmp et des mibs via les dépots apt-get natif sous linux debian.
 
-A ce jour le collecteur est fini. Dans une optique d'mélioration nous voudrions envoyer de manière dynamiques les informations d'un serveur à un autre afin de faire la répartition de charge.
+A ce jour le collecteur est fini. Dans une optique d'amélioration, nous voudrions envoyer de manière dynamiques les informations d'un serveur à un autre afin de faire la répartition de charge.
+
 L'idée serait d'envoyer les informations sous forme de ´PUT´ sous la forme :
 "@IP de l'équipement"_"Element monitoré"_"valeur1"_"valeur2"_.....
 
 #### Module de traitement des données
 
-Le développement de ce module débutera à la fin du développement du module de surveillance.\
+Le développement de ce module débutera à la fin du développement du module de surveillance.
 Son but principal étant de traiter les données du collecteur pour ensuite les stocker en base de donnée.
 
 Il est codé en python ou il lis les fichiers CSV, fait du nettoyage pour les fichiers qui pourraient avoir des problèmes.
 Ensuite nous envoyons les données au serveur de base de données.
 
-Ce module n'a pas besoin d'installation spéciale, tous est codé en python avec les paquets par défault.
+Ce module a besoin de l'installation de "requests".
 
 #### Module de log
 
