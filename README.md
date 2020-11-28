@@ -90,7 +90,7 @@ Ce module est terminé, il propose toutes les fonctionnalités prévues initiale
 
 #### Module de surveillance
 
-Le module de configuration est développé en Bash. Il comprend un script qui récupère via un ´curl´ les équipements à monitorer ainsi que leurs communautées et toutes informations pouvant être utile. Ensuite via des ´snmptable´, nous récupérons les données en les écrivant dans des fichiers "csv" le temps de les traiter. 
+Le module de configuration est développé en Bash. Il comprend un script qui récupère via un ´curl´ les équipements à monitorer ainsi que la version snmp et toutes informations pouvant être utile commme la communauté. Ensuite via des ´snmptable´, nous récupérons les données en les écrivant dans des fichiers "csv" le temps de les traiter. 
 
 Ce module demande l'installation de snmp et des mibs via les dépots apt-get natif sous linux debian.
 
@@ -110,6 +110,8 @@ Il est codé en python ou il lis les fichiers CSV, fait du nettoyage pour les fi
 Ensuite nous envoyons les données au serveur de base de données.
 
 Ce module a besoin de l'installation de "requests".
+
+![Traitement](doc/Traitement.png)
 
 #### Module de log
 
@@ -133,7 +135,13 @@ Cette interface sera très simple :
 
 ## Conclusion
 
-Pour le moment, le module de configuration est finalisé, une infrastructure de test pour l'application est mise en place et le module de surveillance est en cours de développement.
+A ce jour tous les modules sont fini.
+
+Il faut paramétrer un crontab afin de lancer le module de traitement et le collecteur.
+
+![crontab](doc/crontab.png)
+
+Il faut également lancer le flask et la base de donnée au démarrage.
 
 Le projet avance comme prévu, un petit peu de retard a été pris pour mettre en place une infrastructure de test fonctionnelle.
 Il est prévu de mettre en place la base de donnée ainsi que le module de connection a la base de donnée dans les prochaines semaines. En parallèle, le module de surveillance sera en développement, si il est finalisé, le développement du module de traitement débutera.
