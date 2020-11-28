@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+	    <title>Edit a device</title>
+	</head>
+	<body>
+        <h1>Edit a device</h1>
+        <a href="/">Index</a>
+        <form id="form" action="/configure/edition" method="POST">
+            {% for key, data in device.items() %}
+                <label for="{{key}}">{{key}}:</label><input type="text" id="{{key}}" name="{{key}}" value="{{data}}"><br/>
+            {% endfor %}
+            <input type="hidden" name="old_ip" value="{{device.ip}}"/>
+            <input type="submit" value="Submit">
+        </form> 
+          
+    </body>
+    <script>
+        $(document).ready(function() {
+            $('#version').prop('readonly', true);
+            $('#type').prop('readonly', true);
+        });
+    </script>
+</html>

@@ -33,7 +33,12 @@ parser.add_argument('ip')
 parser.add_argument('community')
 parser.add_argument('type')
 parser.add_argument('new_ip')
-parser.add_argument('new_community')
+parser.add_argument('version')
+parser.add_argument('username')
+parser.add_argument('password')
+parser.add_argument('protocol')
+parser.add_argument('protocolprivacy')
+parser.add_argument('passwordprivacy')
 
 #Invoke-WebRequest -Uri 127.0.0.1:5000/api/database/logs/all
 #Invoke-WebRequest -Uri 127.0.0.1:5000/api/database/logs/all -Method POST -Body @{"logType"='test'; "logData"='testData'; "logIP"='6.6.6.6'}
@@ -106,23 +111,40 @@ class DeviceList(Resource):
         cf = Conf_Reader()
         args = parser.parse_args()
 
-        cf.create_device(args['type'], args['ip'], args['community'])
+        print(args)
 
-        return {'type':args['type'], 'ip':args['ip'], 'community':args['community']}, 201
+        if args['version'] == '2':
+            cf.create_device_v2(args['type'], args['ip'], args['community'], args['version'])
+            return {'type':args['type'], 'ip':args['ip'], 'community':args['community']}, 201
+            
+        elif args['version'] == '3':
+            cf.create_device_v3(args['type'], args['ip'], args['version'], args['username'], args['password'], args['protocol'], args['protocolprivacy'], args['passwordprivacy'])
+            return {'type':args['type'], 'ip':args['ip'], 'community':args['community']}, 201
+
+        return {}, 400
 
 class Device(Resource):
     def get(self, device_ip):
-            return {}
+        cf = Conf_Reader()
+        data = cf.get_one(device_ip)
+        return data
 
     #Invoke-WebRequest -Uri 127.0.0.1:5000/api/devices/3.3.3.4 -Method POST -Body @{'new_ip'='9.9.9.9';'community'='commu2';'new_community'='commu';'type'='switch'}
     def post(self, device_ip):
         cf = Conf_Reader()
         args = parser.parse_args()
-        cf.edit_device(args['type'], args['new_ip'], device_ip, args['new_community'], args['community'])
 
-        return {'type':args['type'], 'ip':args['new_ip'], 'community':args['new_community']}, 200
+        if args['version'] == '2':
+            cf.edit_device_v2(args['type'],args['ip'], device_ip, args['community'])
+            return {'type':args['type'], 'ip':args['ip'], 'old_ip':device_ip, 'community':args['community']}, 200
 
-    def delete(self, device_ip): #TODO
+        elif args['version'] == '3':
+            cf.edit_device_v3(args['type'], args['ip'], device_ip, args['username'], args['password'], args['protocol'], args['protocolprivacy'], args['passwordprivacy'])
+            return {'type':args['type'], 'ip':args['ip'], 'old_ip':device_ip, 'version':args['version'], 'username':args['username'], 'password':args['password'], 'protocol':args['protocol'], 'protocolprivacy':args['protocolprivacy'], 'passwordprivacy':args['passwordprivacy']}, 200
+
+        return {}, 400
+
+    def delete(self, device_ip): 
         cf = Conf_Reader()
         cf.delete_device(device_ip)
 

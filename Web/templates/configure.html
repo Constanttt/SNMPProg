@@ -9,51 +9,32 @@
 		<link rel="stylesheet" type="text/css" href="/static/css/datatables.min.css"/>
 		<script type="text/javascript" src="/static/js/datatables.min.js"></script>
 
-	    <title>Supervision</title>
+	    <title>Configuration</title>
 	</head>
 	<body>
-		<h1>Supervision</h1>
-		<p><a href="/configure">Configure monitored devices</a></p>
-		<h2>Monitored devices</h2>
+		<h1>Configuration</h1>
+		<a href="/">Index</a>
 		<table id="" class="display" style="width:100%">
 			<thead>
 				<tr>
 					<th>IP</th>
-					<th>Version</th>
+					<th>Community</th>
 					<th>type</th>
-					<th>Status</th>
+					<th>Delete</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for device in device_list%}
 				<tr>
-					<th><a href="monitor/{{device.ip}}">{{device.ip}}</a></th>
+					<th><a href="/configure/edit/{{device.ip}}">{{device.ip}}</a></th>
 					<th>{{device.version}}</th>
 					<th>{{device.type}}</th>
-					<th>?</th>
+					<th><a href="/configure/delete/{{device.ip}}">Delete</a></th>
 				</tr>
 				{% endfor %}
 			</tbody>
-		</table>
-		<h2>Logs</h2>
-		<table  id="" class="display" style="width:100%">
-			<thead>
-				<tr>
-					<th>logType</th>
-					<th>logData</th>
-					<th>logIP</th>
-				</tr>
-			</thead>
-			<tbody>
-			{% for log in logs%}
-				<tr>
-					<th>{{log.logType}}</th>
-					<th>{{log.logData}}</th>
-					<th><a href="monitor/{{log.logIP}}">{{log.logIP}}</a></th>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+        </table>
+        <a href="/configure/create">Create a device</a>
 		<script>
 			$(document).ready(function() {
 				$('table.display').DataTable();

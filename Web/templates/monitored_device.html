@@ -4,97 +4,67 @@
 	    <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="/static/js/Chart.min.js"></script>
-	    <title>Supervision</title>
+        <script src="/static/js/Chart.bundle.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+		<script type="text/javascript" src="/static/DataTables/js/dataTables.jqueryui.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="/static/css/datatables.min.css"/>
+		<script type="text/javascript" src="/static/js/datatables.min.js"></script>
+	    <title>{{ip}}</title>
     </head>
     <body>
-        <table border="1">
-            <tr>
-                <th>IfIndex</th>
-                <th>OperStatus</th>
-                <th>AdminStatus</th>
-                <th>InOctets</th>
-                <th>InDiscards</th>
-                <th>InErrors</th>
-                <th>OutOctets</th>
-                <th>OutDiscards</th>
-                <th>OutErrors</th>
-                <th>Descr</th>
-                <th>Type</th>
-                <th>Mtu</th>
-                <th>Speed</th>
-                <th>PhysAddress</th>
-                <th>LastChange</th>
-                <th>linkUsage</th>
-                <th>timestamp</th>
-            </tr>
-            {% for value in displayed_data.values() %}
-            <tr>
-                <th>{{value.IfIndex}}</th>
-                <th>{{value.OperStatus}}</th>
-                <th>{{value.AdminStatus}}</th>
-                <th>{{value.InOctets}}</th>
-                <th>{{value.InDiscards}}</th>
-                <th>{{value.InErrors}}</th>
-                <th>{{value.OutOctets}}</th>
-                <th>{{value.OutDiscards}}</th>
-                <th>{{value.OutErrors}}</th>
-                <th>{{value.Descr}}</th>
-                <th>{{value.Type}}</th>
-                <th>{{value.Mtu}}</th>
-                <th>{{value.Speed}}</th>
-                <th>{{value.PhysAddress}}</th>
-                <th>{{value.LastChange}}</th>
-                <th>{{value.linkUsage}}</th>
-                <th>{{value.timestamp}}</th>
-            </tr>
-            {% endfor %}
+        <h1>{{ip}}</h1>
+        <a href="/">Index</a>
+        <table id="" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>IfIndex</th>
+                    <th>OperStatus</th>
+                    <th>AdminStatus</th>
+                    <th>InOctets</th>
+                    <th>InDiscards</th>
+                    <th>InErrors</th>
+                    <th>OutOctets</th>
+                    <th>OutDiscards</th>
+                    <th>OutErrors</th>
+                    <th>Descr</th>
+                    <th>Type</th>
+                    <th>Mtu</th>
+                    <th>Speed</th>
+                    <th>PhysAddress</th>
+                    <th>LastChange</th>
+                    <th>linkUsage</th>
+                    <th>timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for value in displayed_data.values() %}
+                <tr>
+                    <th>{{value.IfIndex}}</th>
+                    <th>{{value.OperStatus}}</th>
+                    <th>{{value.AdminStatus}}</th>
+                    <th>{{value.InOctets}}</th>
+                    <th>{{value.InDiscards}}</th>
+                    <th>{{value.InErrors}}</th>
+                    <th>{{value.OutOctets}}</th>
+                    <th>{{value.OutDiscards}}</th>
+                    <th>{{value.OutErrors}}</th>
+                    <th>{{value.Descr}}</th>
+                    <th>{{value.Type}}</th>
+                    <th>{{value.Mtu}}</th>
+                    <th>{{value.Speed}}</th>
+                    <th>{{value.PhysAddress}}</th>
+                    <th>{{value.LastChange}}</th>
+                    <th>{{value.linkUsage}}</th>
+                    <th>{{value.timestamp}}</th>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
 
 
-        <canvas id="graph" width="600" height="400"></canvas>
+        <canvas id="graph" width="1200" height="600"></canvas>
 
         <script>
-            // bar chart data
-            var barData = {
-            labels : {{graph_labels}},
-            datasets : [
-                {% for key, data in graph_data.items() %}
-                {
-                    label: 'interface{{key}}',
-                    fillColor: "rgba(0,0,0,0)",
-                    strokeColor: getRandomColor(),
-                    bezierCurve : true,
-                    data : {{data}}
-                },
-                {% endfor %}
-            ]
-                
-            }
-                Chart.defaults.global.animationSteps = 50;
-                Chart.defaults.global.tooltipYPadding = 16;
-                Chart.defaults.global.tooltipCornerRadius = 0;
-                Chart.defaults.global.tooltipTitleFontStyle = "normal";
-                Chart.defaults.global.animationEasing = "easeOutBounce";
-                Chart.defaults.global.responsive = false;
-                Chart.defaults.global.scaleLineColor = "black";
-                Chart.defaults.global.scaleFontSize = 16;
-               // get bar chart canvas
-
-                var mychart = document.getElementById("graph").getContext("2d");
-                steps = 10
-                max = {{graph_max}}
-                // draw bar chart
-                var LineChartDemo = new Chart(mychart).Line(barData, {
-                        scaleOverride: true,
-                        scaleSteps: steps,
-                        scaleStepWidth: Math.ceil(max / steps),
-                        scaleShowVerticalLines: true,
-                        scaleShowGridLines : true,
-                        usePointStyle: true,
-                        barShowStroke : true,
-                        bezierCurve: true,
-                });
-
                 function getRandomColor() {
                     var letters = '0123456789ABCDEF'.split('');
                     var color = '#';
@@ -103,6 +73,58 @@
                     }
                     return color;
                 }
+
+                $(document).ready(function() {
+                    $('table.display').DataTable();
+                } );
+
+                $(function(){
+
+                    //get the line chart canvas
+                    var ctx = $("#graph");
+
+                    //line chart data
+                    var data = {
+                        labels: [],
+                        datasets: [
+                        {% for key, data in graph_data.items() %}
+                            {
+                            label: 'interface{{key}}',
+                            data: {{data}},
+                            borderColor: getRandomColor(),
+                            fill: false,
+                            },
+                            {% endfor %}
+                        ]
+                        };
+
+                        //options
+                        var options = {
+                        responsive: false,
+                        title: {
+                            display: true,
+                            position: "top",
+                            text: "Data rates per interface",
+                            fontSize: 18,
+                            fontColor: "#111"
+                        },
+                        legend: {
+                            display: true,
+                            position: "bottom",
+                            labels: {
+                            fontColor: "#333",
+                            fontSize: 16
+                            }
+                        }
+                    };
+
+                    //create Chart class object
+                    var chart = new Chart(ctx, {
+                    type: "line",
+                    data: data,
+                    options: options
+                    });
+                });
         </script>
 	</body>
 </html>

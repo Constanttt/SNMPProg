@@ -17,6 +17,96 @@ def index():
 
     return render_template('index.html',device_list=device_list, logs=logs)
 
+@app.route('/configure')
+def configure():
+    r = requests.get(APISERVER+"/api/devices")
+    device_list = json.loads(r.text)
+
+    return render_template('configure.html',device_list=device_list)
+
+@app.route('/configure/edit/<ip>')
+def configure_edit(ip):
+    r = requests.get(APISERVER+"/api/devices/"+ip)
+    device = json.loads(r.text)
+
+    return render_template('edit_device.html',device=device[0])
+
+@app.route('/configure/create')
+def configure_create():
+    return render_template('create_device.html')
+
+@app.route('/configure/delete/<ip>')
+def configure_delete(ip):
+    r = requests.delete(APISERVER+"/api/devices/"+ip)
+
+    r = requests.get(APISERVER+"/api/devices")
+    device_list = json.loads(r.text)
+
+    return render_template('configure.html',device_list=device_list)
+
+@app.route('/configure/creation', methods = ['POST', 'GET'])
+def configure_creation():
+    if request.method == 'GET':
+        return "Nope"
+    if request.method == 'POST':
+        form_data = request.form
+        if form_data['version'] == '2':
+            payload = {
+                'version':form_data['version'],
+                'ip':form_data['ip'],
+                'type':form_data['type'],
+                'community':form_data['community'],
+                }
+            r = requests.post(APISERVER+"/api/devices", data=payload)
+        if form_data['version'] == '3':
+            payload = {
+                'version':form_data['version'],
+                'ip':form_data['ip'],
+                'type':form_data['type'],
+                'username':form_data['username'],
+                'password':form_data['password'],
+                'protocol':form_data['protocol'],
+                'protocolprivacy':form_data['protocolprivacy'],
+                'passwordprivacy':form_data['passwordprivacy']
+                }
+            r = requests.post(APISERVER+"/api/devices", data=payload)
+
+    r = requests.get(APISERVER+"/api/devices")
+    device_list = json.loads(r.text)
+
+    return render_template('configure.html',device_list=device_list)
+
+@app.route('/configure/edition', methods = ['POST', 'GET'])
+def configure_edition():
+    if request.method == 'GET':
+        return "Nope"
+    if request.method == 'POST':
+        form_data = request.form
+        if form_data['version'] == '2':
+            payload = {
+                'version':form_data['version'],
+                'ip':form_data['ip'],
+                'type':form_data['type'],
+                'community':form_data['community'],
+                }
+            r = requests.post(APISERVER+"/api/devices/"+form_data['old_ip'], data=payload)
+        if form_data['version'] == '3':
+            payload = {
+                'version':form_data['version'],
+                'ip':form_data['ip'],
+                'type':form_data['type'],
+                'username':form_data['username'],
+                'password':form_data['password'],
+                'protocol':form_data['protocol'],
+                'protocolprivacy':form_data['protocolprivacy'],
+                'passwordprivacy':form_data['passwordprivacy']
+                }
+            r = requests.post(APISERVER+"/api/devices/"+form_data['old_ip'], data=payload)
+
+    r = requests.get(APISERVER+"/api/devices")
+    device_list = json.loads(r.text)
+
+    return render_template('configure.html',device_list=device_list)
 
 @app.route('/monitor/<ip>')
 def monitor_ip(ip):
@@ -25,16 +115,10 @@ def monitor_ip(ip):
     
     displayed_data={}
     graph_data = {}
-    graph_labels = []
-    graph_max = 10
 
     old_inOctets = 0
     old_outOctets = 0
     old_speed = 0
-
-    count = 0
-
-    first = ""
 
     for elem in ifTable:
         data_array = elem['data'].split('_')
@@ -46,19 +130,10 @@ def monitor_ip(ip):
 
             s = get_network_speed(old_inOctets, inOctets)
 
-            if first != "":
-                first = data_array[0]
-
             if data_array[0] in graph_data:
                 graph_data[data_array[0]].append(s)
             else:
                 graph_data[data_array[0]] = [s]
-
-            if first == data_array[0]:
-                graph_labels.append(count)
-            
-            if s > graph_max:
-                graph_max = s*1.10
 
             displayed_data[data_array[0]] = {
                 'IfIndex':data_array[0],
@@ -85,7 +160,7 @@ def monitor_ip(ip):
         except:
             print('error while parsing ifTable for display')
 
-    return render_template('monitored_device.html', displayed_data=displayed_data, graph_data=graph_data, graph_labels=graph_labels, graph_max=graph_max)
+    return render_template('monitored_device.html', displayed_data=displayed_data, graph_data=graph_data, ip=ip)
 
 def get_link_usage(inOctet, old_inOctets, outOctets, old_outOctets, ifSpeed):
     diff_inOctet = inOctet - old_inOctets

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+	    <title>Create a device</title>
+	</head>
+	<body>
+        <h1>Create a device</h1>
+        <a href="/">Index</a>
+        <form id="form" action="/configure/creation" method="POST">
+            <label for="version2">SNMPv2c:</label><input type="radio" id="version2" name="version" value="2" checked><br/>
+            <label for="version3">SNMPv3:</label><input type="radio" id="version3" name="version" value="3"><br/>
+            
+            <label for="ip">IP:</label><input type="input" id="ip" name="ip" value="null"><br/>
+            <label for="type">Type:</label><input type="input" id="type" name="type" value="null"><br/>
+
+            <label for="community">Community:</label><input type="input" id="community" name="community" value="null"><br/>
+
+            <label for="username">Username:</label><input type="input" id="username" name="username" value="null" disabled=false><br/>
+            <label for="password">Password:</label><input type="input" id="password" name="password" value="null" disabled><br/>
+            <label for="protocol">Protocol:</label><input type="input" id="protocol" name="protocol" value="null" disabled><br/>
+            <label for="protocolprivacy">Protocolprivacy:</label><input type="input" id="protocolprivacy" name="protocolprivacy" value="null" disabled><br/>
+            <label for="passwordprivacy">Passwordprivacy:</label><input type="input" id="passwordprivacy" name="passwordprivacy" value="null" disabled><br/>
+
+            <input type="submit" value="Submit">
+          </form> 
+    </body>
+    <script>
+        $('#version2').change(function(){
+            $("#community").prop('disabled', false);
+
+            $("#username").prop('disabled', true);
+            $("#password").prop('disabled', true);
+            $("#protocol").prop('disabled', true);
+            $("#protocolprivacy").prop('disabled', true);
+            $("#passwordprivacy").prop('disabled', true);
+        });
+
+        $('#version3').change(function(){
+            $("#community").prop('disabled', true);
+
+            $("#username").prop('disabled', false);
+            $("#password").prop('disabled', false);
+            $("#protocol").prop('disabled', false);
+            $("#protocolprivacy").prop('disabled', false);
+            $("#passwordprivacy").prop('disabled', false);
+        });
+    </script>
+</html>
