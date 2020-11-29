@@ -116,6 +116,10 @@ Ce module a besoin de l'installation de "requests".
 #### Module de log
 
 Il a été décidé de stocker les différents logs dans une base de donnée.
+C'est une base de donnée SQLITE3, choisie pour des raisons de légèreté et de simplicité.
+Elle est composée de 2 tables simple :
+- **logs**, qui va stocker les logs.
+- **snmpdata**, qui va stocker toute les donnée snmp récupérées par le collecteur.
 
 #### Module de connexion a la base de donnée
 
@@ -123,15 +127,44 @@ Ce module sera l'intermédiaire entre les modules ayant besoin d'accéder à la 
 
 Cela permet de ne pas avoir les informations de connection à la base de donnée dans différents modules. Ces informations sont stockées directement dans le module de connection a la base de donnée.
 
-Pour le moment, ce module ne doit que servir d'intermédiaire, mais il faut développer ce module en ayant en tête la possibilité d'un système d'authentification. Ce système ne sera peut être pas développé en raison de contraintes de temps.
+Ce module sert d'intermiédiaire entre l'interface web et le collecteur. Tous les appels a la base de donnée passent par lui.  
+Il a été développé en laissant la possibilité de le mettre a jour (ajout d'authentification etc...)
 
 #### Module de "interface web"
 
-Cette interface sera très simple :
+Cette interface est très simple :
 
-- un tableau récapitulatif des résultats du collecteur (avec possibilité de trier par nom/ip)
-- une page spéciale montrant les logs.
-- une page permettant de visionner des statistiques sur un appareil (si suffisemment de temps)
+- un tableau récapitulatif des machines monitorées
+- un tableau montrant les logs.
+- une page permettant de visionner des statistiques sur un appareil
+- une page d'administration permettant d'ajouter ou de supprimer un appareil
+
+##### Tableau des machines monitorées
+
+![monitored_device_tableau](doc/monitored_device_tableau.png)
+
+##### Tableau Logs
+
+![tableau_logs](doc/tableau_logs.png)
+
+##### Page de statistiques sur appareil
+
+**Tableau contenant les donénes collectées pour une machine donnée**
+![monitor_device](doc/monitor_device.png)
+
+**Graphique montrant l'évolution du débit sur l'interface1**
+![graph_int1](doc/graph_int1.png)
+
+##### Page administration
+
+**Page permettant de choisir quoi configurer**
+![configuration](doc/configuration.png)
+
+**Page d'edition d'une machine**
+![edit_device](doc/edit_device.png)
+
+**Page de création d'une machine**
+![create_device](doc/create_device.png)
 
 ## Conclusion
 
@@ -143,8 +176,5 @@ Il faut paramétrer un crontab afin de lancer le module de traitement et le coll
 
 Il faut également lancer le flask et la base de donnée au démarrage.
 
-Le projet avance comme prévu, un petit peu de retard a été pris pour mettre en place une infrastructure de test fonctionnelle.
-Il est prévu de mettre en place la base de donnée ainsi que le module de connection a la base de donnée dans les prochaines semaines. En parallèle, le module de surveillance sera en développement, si il est finalisé, le développement du module de traitement débutera.
-Le système de log sera développé a la fin, car il faut une base de donnée fonctionnelle pour son fonctionnement.
-
-Pour ce qui est de l'interface web, ce sera la partie finale du projet.
+Le projet c'est déroulé comme prévu. Un peu de retard a été pris lors de la mise en place d'une infrastructure de test fonctionnelle.
+L'application finale a été prévu pour être utilisable sans l'interface web fournie avec. La base de donnée et la configuration des machines sont accessibles via API Rest.
