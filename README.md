@@ -40,14 +40,15 @@ Le module de surveillance sera développé en bash, car la commande `snmptable` 
 
 L'application sera découpée en plusieurs modules différents :
 
-- Module de configuration
-- Module de surveillance
-- Module de traitement des données
-- Module de log
-- Module de connexion a la base de donnée
-- Module "interface web"
+- Module de configuration - contenu dans application
+- Module de surveillance - contenu dans collecteur
+- Module de traitement des données - contenu dans traitement
+- Module de log - contenu dans application et le collecteur
+- Module de connexion a la base de donnée - contenu dans application
+- Module "interface web" - contenu dans web
 
 Les modules seront développés pour pouvoir fonctionner de manière indépendante. Ils communiqueront via API REST. Ce choix de fonctionnement a été choisi afin de permettre à l'administrateur de l'application de mettre les modules sur différents serveurs, si il le souhaite. Ce fonctionnement permet aussi de limiter la charge de travail sur un seul module en répartissant les taches entre différents modules. 
+Ce choix peut aussi permettre la création d'une interface très simplement, tous les appels utils passent par une API. Cela peut permettre a différents utilisateurs de développer leur propre interface correspondant a leurs besoins (si celle de base ne suffit pas)
 
 ### Organisation du travail
 
