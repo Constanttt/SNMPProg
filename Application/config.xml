@@ -1,10 +1,10 @@
 <configuration>
     <switch>
             <device ip="192.168.1.54" version="3" username="auth" password="snmpcomv3" protocol="SHA" protocolprivacy="AES" passwordprivacy="snmpcomv3" />
-    <device ip="wow" version="3" username="hello" password="pouet" protocol="null" protocolprivacy="null" passwordprivacy="null" /></switch>
+    </switch>
     <router>
         </router>
     <pc>
 	    <device ip="192.168.1.2" community="public" version="2" />
-        <device ip="bonjour" community="null" version="2" /></pc>
+        </pc>
 </configuration>
